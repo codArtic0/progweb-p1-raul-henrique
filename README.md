@@ -1,6 +1,6 @@
 # Projeto 1 — Programação Web (UEPB · 2026.2)
 
-**Aluno(a):** Seu Nome Completo
+**Aluno(a):** Raul Henrique Alves de Sousa
 **Disciplina:** Programação Web · Prof. Rodrigo Alves Costa
 
 ## Sobre
