@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tracker Fitness</title>
+  <!-- Bootstrap 5.3.8 via CDN, com SRI: o navegador confere o hash do arquivo -->
+  <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+    integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+    crossorigin="anonymous">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/tema.css">
+</head>
+<body class="bg-body-tertiary">
+  <!-- Aparece só ao navegar por Tab: pula direto para o conteúdo -->
+  <a class="visually-hidden-focusable pular-conteudo" href="#conteudo">Pular para o conteúdo</a>
+
+  <header class="topo text-white py-4 mb-4">
+    <div class="container">
+      <h1 class="h3 mb-0">Tracker Fitness</h1>
+      <p class="mb-0 small">Acompanhe academia, água e sono · SPA em Vanilla JS</p>
+    </div>
+  </header>
+
+  <main id="conteudo" class="container" tabindex="-1">
+    <!-- Resultado das ações (criar, editar, remover) -->
+    <div id="aviso" class="alert d-none" role="status" aria-live="polite"></div>
+
+    <!-- ===================== USUÁRIOS ===================== -->
+    <section class="row g-4 mb-5" aria-labelledby="titulo-usuarios">
+      <div class="col-lg-4">
+        <div class="card shadow-sm">
+          <div class="card-header">
+            <h2 id="titulo-usuarios" class="h5 mb-0">Usuários</h2>
+          </div>
+          <form id="form-usuario" class="card-body" novalidate>
+            <div class="mb-3">
+              <label for="usu-nome" class="form-label">Nome</label>
+              <input id="usu-nome" name="nome" type="text" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label for="usu-email" class="form-label">E-mail</label>
+              <input id="usu-email" name="email" type="email" class="form-control" required>
+            </div>
+            <div class="d-flex gap-2">
+              <button id="usu-salvar" type="submit" class="btn btn-primary">Cadastrar usuário</button>
+              <button id="usu-cancelar" type="button" class="btn btn-outline-secondary d-none">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="col-lg-8">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <!-- Os quatro estados da lista: só um aparece por vez -->
+            <div id="usuarios-carregando" class="text-center py-4">
+              <div class="spinner-border text-primary" aria-hidden="true"></div>
+              <p class="text-body-secondary mt-2 mb-0">Carregando usuários…</p>
+            </div>
+
+            <div id="usuarios-erro" class="alert alert-danger mb-0 d-none" role="alert">
+              <p id="usuarios-erro-msg" class="mb-2"></p>
+              <button id="usuarios-recarregar" type="button" class="btn btn-sm btn-outline-danger">Tentar de novo</button>
+            </div>
+
+            <p id="usuarios-vazio" class="text-body-secondary text-center py-4 mb-0 d-none">
+              Nenhum usuário ainda. Cadastre o primeiro no formulário.
+            </p>
+
+            <div id="usuarios-sucesso" class="table-responsive d-none">
+              <table class="table table-hover align-middle mb-0">
+                <caption class="visually-hidden">Lista de usuários cadastrados</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Nome</th>
+                    <th scope="col">E-mail</th>
+                    <th scope="col" class="text-end">Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="usuarios-linhas"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== REGISTROS DIÁRIOS ===================== -->
+    <section class="row g-4 mb-5" aria-labelledby="titulo-registros">
+      <div class="col-lg-4">
+        <div class="card shadow-sm">
+          <div class="card-header">
+            <h2 id="titulo-registros" class="h5 mb-0">Registros diários</h2>
+          </div>
+          <form id="form-registro" class="card-body" novalidate>
+            <div class="mb-3">
+              <label for="reg-usuario" class="form-label">Usuário</label>
+              <!-- As opções vêm da lista de usuários, via JS -->
+              <select id="reg-usuario" name="usuarioId" class="form-select" required>
+                <option value="">Selecione…</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="reg-data" class="form-label">Data</label>
+              <input id="reg-data" name="data" type="date" class="form-control" required>
+            </div>
+            <div class="form-check mb-3">
+              <input id="reg-academia" name="foiAcademia" type="checkbox" class="form-check-input">
+              <label for="reg-academia" class="form-check-label">Foi à academia</label>
+            </div>
+            <div class="mb-3">
+              <label for="reg-agua" class="form-label">Água consumida (ml)</label>
+              <input id="reg-agua" name="aguaConsumidaMl" type="number" min="0" step="1"
+                class="form-control" aria-describedby="ajuda-agua">
+              <div id="ajuda-agua" class="form-text">Opcional. Ex.: 2000 para 2 litros.</div>
+            </div>
+            <div class="mb-3">
+              <label for="reg-sono" class="form-label">Sono (minutos)</label>
+              <input id="reg-sono" name="duracaoSonoMinutos" type="number" min="0" max="1440" step="1"
+                class="form-control" aria-describedby="ajuda-sono">
+              <div id="ajuda-sono" class="form-text">Opcional. Ex.: 480 para 8 horas de sono.</div>
+            </div>
+            <div class="d-flex gap-2">
+              <button id="reg-salvar" type="submit" class="btn btn-primary">Registrar dia</button>
+              <button id="reg-cancelar" type="button" class="btn btn-outline-secondary d-none">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="col-lg-8">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <div id="registros-carregando" class="text-center py-4">
+              <div class="spinner-border text-primary" aria-hidden="true"></div>
+              <p class="text-body-secondary mt-2 mb-0">Carregando registros…</p>
+            </div>
+
+            <div id="registros-erro" class="alert alert-danger mb-0 d-none" role="alert">
+              <p id="registros-erro-msg" class="mb-2"></p>
+              <button id="registros-recarregar" type="button" class="btn btn-sm btn-outline-danger">Tentar de novo</button>
+            </div>
+
+            <p id="registros-vazio" class="text-body-secondary text-center py-4 mb-0 d-none">
+              Nenhum registro ainda. Cadastre um usuário e registre o primeiro dia.
+            </p>
+
+            <div id="registros-sucesso" class="table-responsive d-none">
+              <table class="table table-hover align-middle mb-0">
+                <caption class="visually-hidden">Registros diários de academia, água e sono</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Usuário</th>
+                    <th scope="col">Data</th>
+                    <th scope="col">Academia</th>
+                    <th scope="col" class="text-end">Água</th>
+                    <th scope="col" class="text-end">Sono</th>
+                    <th scope="col" class="text-end">Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="registros-linhas"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="container text-body-secondary small pb-4">
+    Programação Web · UEPB · 2026.2 · Semana 4
+  </footer>
+
+  <!-- type="module": habilita import/export e só roda depois de o HTML virar DOM -->
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
