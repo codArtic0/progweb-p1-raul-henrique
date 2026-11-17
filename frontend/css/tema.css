@@ -1,0 +1,133 @@
+/* Tema fitness do Projeto 1.
+   Vem DEPOIS do Bootstrap e do style.css: só sobrescreve variáveis e estilos,
+   sem tocar na estrutura nem no JavaScript. */
+:root {
+  --fit-accent: #0f766e;       /* verde-azulado: 5,5:1 sobre branco */
+  --fit-accent-dark: #115e59;
+  --fit-accent-rgb: 15, 118, 110;
+  --bs-primary: var(--fit-accent);
+  --bs-primary-rgb: var(--fit-accent-rgb);
+  --bs-link-color: var(--fit-accent);
+  --bs-link-color-rgb: var(--fit-accent-rgb);
+  --bs-link-hover-color: var(--fit-accent-dark);
+  --bs-focus-ring-color: rgba(var(--fit-accent-rgb), 0.35);
+  --bs-body-bg: #f4f7f6;
+  --bs-tertiary-bg: #f4f7f6;
+}
+
+/* Cabeçalho com degradê */
+.topo {
+  background: linear-gradient(135deg, #0b3d3a 0%, var(--fit-accent) 100%);
+}
+.topo h1 {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.topo p {
+  opacity: 0.9;
+}
+
+/* Botões e campos com a cor do tema */
+.btn-primary {
+  --bs-btn-bg: var(--fit-accent);
+  --bs-btn-border-color: var(--fit-accent);
+  --bs-btn-hover-bg: var(--fit-accent-dark);
+  --bs-btn-hover-border-color: var(--fit-accent-dark);
+  --bs-btn-active-bg: var(--fit-accent-dark);
+  --bs-btn-active-border-color: var(--fit-accent-dark);
+  --bs-btn-disabled-bg: var(--fit-accent);
+  --bs-btn-disabled-border-color: var(--fit-accent);
+  --bs-btn-focus-shadow-rgb: var(--fit-accent-rgb);
+}
+.btn-outline-primary {
+  --bs-btn-color: var(--fit-accent);
+  --bs-btn-border-color: var(--fit-accent);
+  --bs-btn-hover-bg: var(--fit-accent);
+  --bs-btn-hover-border-color: var(--fit-accent);
+  --bs-btn-active-bg: var(--fit-accent-dark);
+  --bs-btn-active-border-color: var(--fit-accent-dark);
+  --bs-btn-disabled-color: var(--fit-accent);
+  --bs-btn-disabled-border-color: var(--fit-accent);
+  --bs-btn-focus-shadow-rgb: var(--fit-accent-rgb);
+}
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--fit-accent);
+  box-shadow: 0 0 0 0.25rem rgba(var(--fit-accent-rgb), 0.25);
+}
+.form-check-input:checked {
+  background-color: var(--fit-accent);
+  border-color: var(--fit-accent);
+}
+.form-check-input:focus {
+  border-color: var(--fit-accent);
+  box-shadow: 0 0 0 0.25rem rgba(var(--fit-accent-rgb), 0.25);
+}
+.spinner-border.text-primary {
+  color: var(--fit-accent) !important;
+}
+
+/* Cartões: faixa de cor no topo, cabeçalho limpo */
+.card {
+  border: 0;
+  border-top: 3px solid var(--fit-accent);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+.card-header {
+  background-color: #fff;
+  font-weight: 600;
+}
+
+/* Tabelas: cabeçalho discreto, linhas com respiro */
+thead th {
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--bs-secondary-color);
+  border-bottom-width: 2px;
+}
+.table > :not(caption) > * > * {
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+.table-hover > tbody > tr:hover > * {
+  --bs-table-hover-bg: rgba(var(--fit-accent-rgb), 0.06);
+}
+
+/* Link "pular para o conteúdo": visível só com foco do teclado */
+.pular-conteudo:focus {
+  position: fixed;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 1080;
+  padding: 0.5rem 1rem;
+  background: #fff;
+  color: var(--fit-accent-dark);
+  border-radius: 0.5rem;
+  box-shadow: 0 0 0 3px var(--fit-accent);
+}
+main:focus {
+  outline: none;
+}
+
+/* Telas de toque: alvos de pelo menos 44 px (WCAG 2.5.5) */
+@media (pointer: coarse) {
+  .btn,
+  .btn-sm {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  .form-check-input {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+}
+
+/* Em telas largas e altas, o formulário acompanha a rolagem */
+@media (min-width: 992px) and (min-height: 760px) {
+  .col-lg-4 > .card {
+    position: sticky;
+    top: 1rem;
+  }
+}
