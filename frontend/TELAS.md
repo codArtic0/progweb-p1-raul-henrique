@@ -21,3 +21,4 @@ Front: `npx http-server -p 5500 -c-1` em `frontend/` · API: `npm run dev` em `b
 - api: `js/api.js` · services: `js/services/` · state: `js/state/store.js` · ui: `js/ui/`
 - `main.js` só liga as camadas: sem regra, sem `fetch`, sem `document.`
 - O resumo do topo (sequência, metas batidas) vem de `services/resumoService.js`; a UI só desenha.
+- O painel "Hoje" (anéis de progresso e faixa dos últimos 14 dias) vem de `services/resumoService.js`; `ui/hojeView.js` só desenha.

@@ -37,6 +37,7 @@
       </a>
       <ul class="topo-links">
         <li><a href="#resumo">Resumo</a></li>
+        <li><a href="#titulo-hoje">Hoje</a></li>
         <li><a href="#titulo-habitos">Hábitos</a></li>
         <li><a href="#titulo-registros">Registros</a></li>
       </ul>
@@ -75,9 +76,25 @@
       </article>
     </section>
 
+    <!-- ===================== HOJE ===================== -->
+    <section class="secao" aria-labelledby="titulo-hoje">
+      <p class="secao-sobretitulo">Painel</p>
+      <h2 id="titulo-hoje" class="secao-titulo"><span data-icone="chama" aria-hidden="true"></span> Hoje</h2>
+      <div id="hoje-cartoes" class="hoje-grade" aria-live="polite"></div>
+
+      <div class="historico">
+        <h3 class="historico-titulo">Últimos 14 dias</h3>
+        <ol id="historico-faixa" class="historico-faixa" aria-label="Metas batidas por dia, do mais antigo ao mais recente"></ol>
+        <p class="historico-legenda"><span>menos</span>
+          <i class="dia nivel-0"></i><i class="dia nivel-1"></i><i class="dia nivel-2"></i><i class="dia nivel-3"></i><i class="dia nivel-4"></i>
+          <span>todas as metas</span></p>
+      </div>
+    </section>
+
     <!-- ===================== HÁBITOS ===================== -->
     <section class="row g-4 secao" aria-labelledby="titulo-habitos">
       <div class="col-12">
+        <p class="secao-sobretitulo">Metas</p>
         <h2 id="titulo-habitos" class="secao-titulo"><span data-icone="alvo" aria-hidden="true"></span> Meus hábitos</h2>
         <p class="secao-sub">Defina o que você quer acompanhar e a meta de cada dia: treino e sono em minutos, água em ml.</p>
       </div>
@@ -159,6 +176,7 @@
     <!-- ===================== REGISTROS ===================== -->
     <section class="row g-4 secao" aria-labelledby="titulo-registros">
       <div class="col-12">
+        <p class="secao-sobretitulo">Histórico</p>
         <h2 id="titulo-registros" class="secao-titulo"><span data-icone="calendario" aria-hidden="true"></span> Registros do dia a dia</h2>
         <p class="secao-sub">Um registro por hábito por dia. A barra mostra o quanto da meta você cumpriu.</p>
       </div>

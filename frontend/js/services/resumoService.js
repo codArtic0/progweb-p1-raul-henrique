@@ -27,3 +27,30 @@ export function calcularResumo(habitos, registros, hoje = new Date()) {
     sequencia: calcularSequencia(registros, hoje),
   };
 }
+
+// "Hoje": para cada hábito, o registro de hoje (ou null) e o quanto da meta já foi.
+export function hojePorHabito(habitos, registros, hoje = new Date()) {
+  const dia = chaveDoDia(hoje);
+  return habitos.map((habito) => {
+    const registro = registros.find((r) => r.habitoId === habito.id && r.data === dia) ?? null;
+    return {
+      habito,
+      registro,
+      pct: registro ? registro.pct : 0,
+      atingiu: registro ? registro.atingiu : false,
+    };
+  });
+}
+
+// Últimos N dias (do mais antigo ao de hoje). nivel: 0 a 4 = fração de hábitos com meta batida.
+export function ultimosDias(habitos, registros, hoje = new Date(), n = 14) {
+  const dias = [];
+  for (let i = n - 1; i >= 0; i -= 1) {
+    const d = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate() - i);
+    const data = chaveDoDia(d);
+    const batidas = registros.filter((r) => r.data === data && r.atingiu).length;
+    const nivel = habitos.length ? Math.ceil((batidas / habitos.length) * 4) : 0;
+    dias.push({ data, batidas, total: habitos.length, nivel });
+  }
+  return dias;
+}

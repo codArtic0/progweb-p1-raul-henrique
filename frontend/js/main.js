@@ -2,10 +2,11 @@
 import { criarStore } from './state/store.js';
 import { habitoService } from './services/habitoService.js';
 import { registroService, enriquecer } from './services/registroService.js';
-import { calcularResumo } from './services/resumoService.js';
+import { calcularResumo, hojePorHabito, ultimosDias } from './services/resumoService.js';
 import { habitoView } from './ui/habitoView.js';
 import { registroView } from './ui/registroView.js';
 import { resumoView } from './ui/resumoView.js';
+import { hojeView } from './ui/hojeView.js';
 import { hidratarIcones } from './ui/icones.js';
 import './ui/tema.js'; // liga o botão de tema claro/escuro
 import { aviso } from './ui/aviso.js';
@@ -166,12 +167,32 @@ function atualizarResumo() {
   const h = habitos.get();
   const r = registros.get();
   const pronto = ['sucesso', 'vazio'].includes(h.status) && ['sucesso', 'vazio'].includes(r.status);
-  resumoView.render(pronto
-    ? calcularResumo(h.habitos, enriquecer(r.registros, h.habitos))
-    : null);
+  if (!pronto) {
+    resumoView.render(null);
+    hojeView.render(null);
+    return;
+  }
+  const lista = enriquecer(r.registros, h.habitos);
+  resumoView.render(calcularResumo(h.habitos, lista));
+  hojeView.render({
+    cartoes: hojePorHabito(h.habitos, lista),
+    dias: ultimosDias(h.habitos, lista),
+  });
 }
 habitos.assinar(atualizarResumo);
 registros.assinar(atualizarResumo);
+
+// Painel "Hoje": registrar um hábito novo (preenche o formulário) ou ajustar o de hoje
+hojeView.aoClicar({
+  registrar: (habitoId) => {
+    registros.set({ editandoId: null });
+    registroView.prepararNovo(habitoId);
+  },
+  ajustar: (registroId) => {
+    editarRegistro(registroId);
+    document.querySelector('#form-registro').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  },
+});
 
 // ===================== INÍCIO =====================
 carregarHabitos();

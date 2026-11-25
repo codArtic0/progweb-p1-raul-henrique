@@ -132,6 +132,16 @@ export const registroView = {
     el.form.valor.focus();
   },
 
+  // Atalho do painel "Hoje": deixa o formulário pronto para registrar este hábito hoje
+  prepararNovo(habitoId) {
+    el.form.reset();
+    el.form.data.value = hoje();
+    el.form.habitoId.value = habitoId;
+    atualizarUnidade();
+    el.form.valor.focus();
+    el.form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  },
+
   limparForm() {
     el.form.reset();
     el.form.data.value = hoje();
