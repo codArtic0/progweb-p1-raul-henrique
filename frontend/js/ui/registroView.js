@@ -1,9 +1,12 @@
-// Camada de UI dos registros diários. Mesmo molde da usuarioView, com um <select> a mais.
+// Camada de UI dos registros. Mesmo molde da habitoView, com um <select> a mais.
 import { icone } from './icones.js';
+import { TIPOS, formatarValor } from './tipos.js';
 
 const el = {
   form: document.querySelector('#form-registro'),
-  usuario: document.querySelector('#reg-usuario'),
+  habito: document.querySelector('#reg-habito'),
+  unidade: document.querySelector('#unid-valor'),
+  ajuda: document.querySelector('#ajuda-valor'),
   salvar: document.querySelector('#reg-salvar'),
   cancelar: document.querySelector('#reg-cancelar'),
   carregando: document.querySelector('#registros-carregando'),
@@ -15,8 +18,8 @@ const el = {
   linhas: document.querySelector('#registros-linhas'),
 };
 
-// id → nome, para mostrar o dono do registro sem outra requisição
-let nomeDoUsuario = new Map();
+// id → hábito, para mostrar unidade e meta no formulário
+let habitosPorId = new Map();
 
 // '2026-11-17' → '17/11/2026' (sem Date: evita o deslocamento de fuso horário)
 function formatarData(data) {
@@ -24,9 +27,10 @@ function formatarData(data) {
   return `${dia}/${mes}/${ano}`;
 }
 
-function formatarSono(minutos) {
-  if (minutos == null) return '—';
-  return `${Math.floor(minutos / 60)}h${String(minutos % 60).padStart(2, '0')}`;
+// Data de hoje no fuso local, no formato do <input type="date">
+function hoje() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
 function celula(classe = '', rotulo = '') {
@@ -48,64 +52,59 @@ function botao(rotulo, nomeIcone, acao, id, classe) {
   return b;
 }
 
-// Selo (badge) com ícone e texto: a informação nunca depende só da cor.
-function selo(nomeIcone, texto, classe) {
-  const s = document.createElement('span');
-  s.className = `selo ${classe}`;
-  s.append(icone(nomeIcone), document.createTextNode(texto));
-  return s;
-}
-
-const ROTULO_SONO = { baixo: 'abaixo do ideal', ideal: 'no ideal', alto: 'acima do ideal' };
-
 function linha(registro, editandoId) {
+  const { habito } = registro;
   const tr = document.createElement('tr');
   if (registro.id === editandoId) tr.className = 'editando';
 
-  const dono = nomeDoUsuario.get(registro.usuarioId)
-    ?? `usuário #${registro.usuarioId} (removido)`; // registro órfão: assunto da S5
+  // Quando
+  const quando = celula('celula-principal numero fw-semibold text-nowrap');
+  quando.textContent = formatarData(registro.data);
 
-  // Quando: data em destaque e o dono embaixo
-  const quando = celula('celula-principal');
-  const data = document.createElement('span');
-  data.className = 'fw-semibold numero d-block';
-  data.textContent = formatarData(registro.data);
-  const quem = document.createElement('small');
-  quem.className = 'text-body-secondary';
-  quem.textContent = dono;
-  quando.append(data, quem);
-
-  // Treino: selo com ícone
-  const treino = celula('', 'Treino');
-  treino.append(registro.foiAcademia
-    ? selo('halter', 'Treinou', 'selo-treino')
-    : selo('calendario', 'Descanso', 'selo-neutro'));
-
-  // Água: valor + barra de progresso da meta
-  const agua = celula('', 'Água');
-  const valor = document.createElement('span');
-  valor.className = 'numero d-block';
-  valor.textContent = `${registro.aguaConsumidaMl} ml`;
-  const barra = document.createElement('div');
-  barra.className = 'progress barra-agua';
-  barra.setAttribute('role', 'progressbar');
-  barra.setAttribute('aria-label', 'Meta de água do dia');
-  barra.setAttribute('aria-valuenow', registro.aguaPct);
-  barra.setAttribute('aria-valuemin', '0');
-  barra.setAttribute('aria-valuemax', '100');
-  const preenchida = document.createElement('div');
-  preenchida.className = 'progress-bar';
-  preenchida.style.width = `${registro.aguaPct}%`;
-  barra.append(preenchida);
-  agua.append(valor, barra);
-
-  // Sono: selo colorido pela faixa, com a leitura por extenso
-  const sono = celula('', 'Sono');
-  if (registro.sonoFaixa) {
-    sono.append(selo('lua', formatarSono(registro.duracaoSonoMinutos), `selo-sono-${registro.sonoFaixa}`));
-    sono.title = ROTULO_SONO[registro.sonoFaixa];
+  // Hábito: ícone na cor do tipo + nome
+  const qual = celula('', 'Hábito');
+  if (habito) {
+    const chip = document.createElement('span');
+    chip.className = `chip-tipo chip-pequeno tipo-${habito.tipo}`;
+    chip.append(icone(TIPOS[habito.tipo].icone));
+    const nome = document.createElement('span');
+    nome.textContent = habito.nome;
+    const grupo = document.createElement('span');
+    grupo.className = 'd-flex align-items-center gap-2';
+    grupo.append(chip, nome);
+    qual.append(grupo);
   } else {
-    sono.textContent = '—';
+    qual.textContent = `hábito #${registro.habitoId} (removido)`; // registro órfão
+  }
+
+  // Progresso: valor, meta e barra na cor do tipo
+  const progresso = celula('', 'Progresso');
+  if (habito) {
+    const topo = document.createElement('span');
+    topo.className = 'd-flex align-items-center gap-2 numero';
+    topo.append(document.createTextNode(
+      `${formatarValor(habito.tipo, registro.valor)} de ${formatarValor(habito.tipo, habito.meta)}`,
+    ));
+    if (registro.atingiu) {
+      const selo = document.createElement('span');
+      selo.className = 'selo selo-ok';
+      selo.append(icone('ok'), document.createTextNode('Meta batida'));
+      topo.append(selo);
+    }
+    const barra = document.createElement('div');
+    barra.className = `progress barra-habito tipo-${habito.tipo}`;
+    barra.setAttribute('role', 'progressbar');
+    barra.setAttribute('aria-label', `Progresso da meta de ${habito.nome}`);
+    barra.setAttribute('aria-valuenow', registro.pct);
+    barra.setAttribute('aria-valuemin', '0');
+    barra.setAttribute('aria-valuemax', '100');
+    const preenchida = document.createElement('div');
+    preenchida.className = 'progress-bar';
+    preenchida.style.width = `${registro.pct}%`;
+    barra.append(preenchida);
+    progresso.append(topo, barra);
+  } else {
+    progresso.textContent = String(registro.valor);
   }
 
   const acoes = celula('text-end text-nowrap celula-acoes');
@@ -114,21 +113,34 @@ function linha(registro, editandoId) {
     botao(`Remover registro de ${formatarData(registro.data)}`, 'lixeira', 'remover', registro.id, 'btn-outline-danger'),
   );
 
-  tr.append(quando, treino, agua, sono, acoes);
+  tr.append(quando, qual, progresso, acoes);
   return tr;
 }
 
+// Unidade e meta do hábito escolhido, ao lado do campo de valor
+function atualizarUnidade() {
+  const habito = habitosPorId.get(Number(el.habito.value));
+  if (!habito) {
+    el.unidade.textContent = '—';
+    el.ajuda.textContent = 'Escolha um hábito para ver a unidade e a meta.';
+    return;
+  }
+  el.unidade.textContent = TIPOS[habito.tipo].unidade;
+  el.ajuda.textContent = `Meta de ${habito.nome}: ${formatarValor(habito.tipo, habito.meta)} por dia.`;
+}
+
 export const registroView = {
-  // Preenche o <select> com os usuários que existem agora
-  preencherUsuarios(usuarios) {
-    nomeDoUsuario = new Map(usuarios.map((u) => [u.id, u.nome]));
-    const escolhido = el.usuario.value;
+  // Preenche o <select> com os hábitos que existem agora
+  preencherHabitos(habitos) {
+    habitosPorId = new Map(habitos.map((h) => [h.id, h]));
+    const escolhido = el.habito.value;
 
-    const opcoes = usuarios.map((u) => new Option(`${u.nome} (#${u.id})`, u.id));
-    el.usuario.replaceChildren(new Option('Selecione…', ''), ...opcoes);
+    const opcoes = habitos.map((h) => new Option(h.nome, h.id));
+    el.habito.replaceChildren(new Option('Selecione…', ''), ...opcoes);
 
-    // mantém a escolha, se o usuário ainda existir
-    if (nomeDoUsuario.has(Number(escolhido))) el.usuario.value = escolhido;
+    // mantém a escolha, se o hábito ainda existir
+    if (habitosPorId.has(Number(escolhido))) el.habito.value = escolhido;
+    atualizarUnidade();
   },
 
   render({ status, registros, erro, editandoId, salvando }) {
@@ -140,33 +152,35 @@ export const registroView = {
     el.erroMsg.textContent = erro ?? '';
     el.linhas.replaceChildren(...registros.map((r) => linha(r, editandoId)));
 
-    // O backend não deixa mudar usuário nem data: travados durante a edição
-    el.form.usuarioId.disabled = Boolean(editandoId);
+    // O backend não deixa mudar hábito nem data: travados durante a edição
+    el.form.habitoId.disabled = Boolean(editandoId);
     el.form.data.disabled = Boolean(editandoId);
 
     el.salvar.disabled = salvando;
     el.salvar.textContent = salvando
       ? 'Salvando…'
-      : editandoId ? 'Salvar alterações' : 'Registrar dia';
+      : editandoId ? 'Salvar alterações' : 'Registrar';
     el.cancelar.classList.toggle('d-none', !editandoId);
   },
 
   preencherForm(registro) {
-    el.form.usuarioId.value = registro.usuarioId;
+    el.form.habitoId.value = registro.habitoId;
     el.form.data.value = registro.data;
-    el.form.foiAcademia.checked = registro.foiAcademia;
-    el.form.aguaConsumidaMl.value = registro.aguaConsumidaMl;
-    el.form.duracaoSonoMinutos.value = registro.duracaoSonoMinutos ?? '';
-    el.form.aguaConsumidaMl.focus();
+    el.form.valor.value = registro.valor;
+    atualizarUnidade();
+    el.form.valor.focus();
   },
 
   limparForm() {
     el.form.reset();
+    el.form.data.value = hoje();
+    atualizarUnidade();
   },
 
   aoEnviar(fn) {
     el.form.addEventListener('submit', (evento) => {
       evento.preventDefault();
+      // campos desabilitados (edição) não entram no FormData: a edição só usa o valor
       fn(Object.fromEntries(new FormData(el.form)));
     });
   },
@@ -189,3 +203,6 @@ export const registroView = {
     });
   },
 };
+
+el.habito.addEventListener('change', atualizarUnidade);
+el.form.data.value = hoje(); // a data começa em hoje

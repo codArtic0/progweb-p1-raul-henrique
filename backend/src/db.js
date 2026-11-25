@@ -9,46 +9,56 @@ export const db = new DatabaseSync(arquivo);
 db.exec('PRAGMA foreign_keys = ON;');
 
 // O schema. IF NOT EXISTS: este arquivo roda toda vez que o servidor sobe.
-// A tabela "pai" (usuarios) vem antes da "filha" (registros_diarios).
+// A tabela "pai" (habitos) vem antes da "filha" (registros).
+// tipo define a unidade do hábito: treino e sono em minutos, água em ml.
 db.exec(`
-  CREATE TABLE IF NOT EXISTS usuarios (
+  CREATE TABLE IF NOT EXISTS habitos (
     id        INTEGER PRIMARY KEY AUTOINCREMENT,
-    nome      TEXT NOT NULL,
-    email     TEXT NOT NULL UNIQUE,
+    nome      TEXT NOT NULL UNIQUE,
+    tipo      TEXT NOT NULL CHECK (tipo IN ('treino', 'agua', 'sono')),
+    meta      REAL NOT NULL CHECK (meta > 0),
     criado_em TEXT NOT NULL
   );
 
-  CREATE TABLE IF NOT EXISTS registros_diarios (
-    id                   INTEGER PRIMARY KEY AUTOINCREMENT,
-    usuario_id           INTEGER NOT NULL REFERENCES usuarios(id),
-    data                 TEXT NOT NULL,
-    foi_academia         INTEGER NOT NULL DEFAULT 0,
-    agua_consumida_ml    REAL NOT NULL DEFAULT 0,
-    duracao_sono_minutos REAL,
-    UNIQUE (usuario_id, data)
+  CREATE TABLE IF NOT EXISTS registros (
+    id        INTEGER PRIMARY KEY AUTOINCREMENT,
+    habito_id INTEGER NOT NULL REFERENCES habitos(id),
+    data      TEXT NOT NULL,
+    valor     REAL NOT NULL CHECK (valor >= 0),
+    UNIQUE (habito_id, data)
   );
 `);
 
 // Dados de exemplo: só entram se o banco estiver vazio.
 // No Render grátis o arquivo some a cada reinício; assim a demo nunca abre vazia.
-const { total } = db.prepare('SELECT COUNT(*) AS total FROM usuarios').get();
+// As datas são relativas a hoje, para a sequência (streak) aparecer viva.
+const { total } = db.prepare('SELECT COUNT(*) AS total FROM habitos').get();
 if (total === 0) {
-  const inserirUsuario = db.prepare(
-    'INSERT INTO usuarios (nome, email, criado_em) VALUES (?, ?, ?)',
+  const inserirHabito = db.prepare(
+    'INSERT INTO habitos (nome, tipo, meta, criado_em) VALUES (?, ?, ?, ?)',
   );
   const inserirRegistro = db.prepare(
-    `INSERT INTO registros_diarios
-       (usuario_id, data, foi_academia, agua_consumida_ml, duracao_sono_minutos)
-     VALUES (?, ?, ?, ?, ?)`,
+    'INSERT INTO registros (habito_id, data, valor) VALUES (?, ?, ?)',
   );
   const agora = new Date().toISOString();
+  const academia = inserirHabito.run('Academia', 'treino', 45, agora).lastInsertRowid;
+  const agua = inserirHabito.run('Beber água', 'agua', 2000, agora).lastInsertRowid;
+  const sono = inserirHabito.run('Dormir bem', 'sono', 480, agora).lastInsertRowid;
 
-  const ana = inserirUsuario.run('Ana Exemplo', 'ana@exemplo.com', agora).lastInsertRowid;
-  const bruno = inserirUsuario.run('Bruno Exemplo', 'bruno@exemplo.com', agora).lastInsertRowid;
-
-  inserirRegistro.run(ana, '2026-11-10', 1, 2200, 450);
-  inserirRegistro.run(ana, '2026-11-11', 0, 1800, 420);
-  inserirRegistro.run(ana, '2026-11-12', 1, 2500, 480);
-  inserirRegistro.run(bruno, '2026-11-10', 0, 1500, 390);
-  inserirRegistro.run(bruno, '2026-11-11', 1, 2000, 435);
+  const diaAtras = (n) => {
+    const d = new Date();
+    d.setDate(d.getDate() - n);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  };
+  // [dias atrás, treino (min), água (ml), sono (min)]; null = sem registro
+  const historico = [
+    [0, 50, 2100, 450], [1, 45, 1800, 420], [2, null, 2300, 500], [3, 60, 2000, 480],
+    [4, null, 1500, 390], [5, 40, 2200, 465],
+  ];
+  for (const [n, t, a, s] of historico) {
+    const data = diaAtras(n);
+    if (t !== null) inserirRegistro.run(academia, data, t);
+    inserirRegistro.run(agua, data, a);
+    inserirRegistro.run(sono, data, s);
+  }
 }

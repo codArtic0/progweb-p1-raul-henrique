@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import usuariosRouter from './routes/usuarios.js';
+import habitosRouter from './routes/habitos.js';
 import registrosRouter from './routes/registros.js';
 import { logger } from './middleware/logger.js';
 import { errorHandler } from './middleware/errorHandler.js';
@@ -17,11 +17,11 @@ app.use(logger);         // loga toda requisição
 
 // --- Health check ---
 app.get('/', (req, res) => {
-  res.json({ api: 'Tracker Fitness API', versao: '1.0.0', rotas: ['/usuarios', '/registros'] });
+  res.json({ api: 'TrackerFit API', versao: '1.0.0', rotas: ['/habitos', '/registros'] });
 });
 
 // --- Rotas ---
-app.use('/usuarios', usuariosRouter);
+app.use('/habitos', habitosRouter);
 app.use('/registros', registrosRouter);
 
 // --- 404 para rotas que não existem ---

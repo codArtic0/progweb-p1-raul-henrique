@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
-  <meta name="description" content="Tracker Fitness: acompanhe treino, água e sono, dia após dia.">
-  <title>Tracker Fitness · treino, água e sono</title>
+  <meta name="description" content="TrackerFit: seu tracker pessoal de hábitos fitness (treino, água e sono).">
+  <title>TrackerFit · seu tracker pessoal de hábitos</title>
   <!-- Favicon em SVG, embutido: sem arquivo extra -->
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%230f766e'/%3E%3Cpath d='M5 17h5l3-8 5 14 3-6h6' fill='none' stroke='white' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
   <!-- Aplica o tema salvo ANTES de pintar a página: evita o "flash" claro -->
@@ -37,7 +37,7 @@
       </a>
       <ul class="topo-links">
         <li><a href="#resumo">Resumo</a></li>
-        <li><a href="#titulo-usuarios">Usuários</a></li>
+        <li><a href="#titulo-habitos">Hábitos</a></li>
         <li><a href="#titulo-registros">Registros</a></li>
       </ul>
       <button id="alternar-tema" type="button" class="btn-tema" aria-label="Alternar tema claro e escuro">
@@ -46,8 +46,8 @@
     </nav>
 
     <div class="container topo-hero">
-      <h1>Seu dia em três números.</h1>
-      <p>Treino, água e sono: registre em segundos e veja a constância aparecer.</p>
+      <h1>Um dia de cada vez.</h1>
+      <p>Defina metas de treino, água e sono, registre o seu dia e veja a constância aparecer.</p>
     </div>
   </header>
 
@@ -57,48 +57,61 @@
 
     <!-- ===================== RESUMO (derivado dos dados) ===================== -->
     <section id="resumo" class="resumo" aria-label="Resumo geral">
-      <article class="metrica metrica-usuario">
-        <span class="metrica-icone" data-icone="usuario" aria-hidden="true"></span>
-        <div><p class="metrica-valor numero" id="res-usuarios">—</p><p class="metrica-rotulo">Usuários</p></div>
+      <article class="metrica metrica-chama">
+        <span class="metrica-icone" data-icone="chama" aria-hidden="true"></span>
+        <div><p class="metrica-valor numero" id="res-sequencia">—</p><p class="metrica-rotulo">Dias seguidos com meta</p></div>
       </article>
-      <article class="metrica metrica-treino">
-        <span class="metrica-icone" data-icone="halter" aria-hidden="true"></span>
-        <div><p class="metrica-valor numero" id="res-treinos">—</p><p class="metrica-rotulo">Dias de treino</p></div>
+      <article class="metrica metrica-ok">
+        <span class="metrica-icone" data-icone="alvo" aria-hidden="true"></span>
+        <div><p class="metrica-valor numero" id="res-metas">—</p><p class="metrica-rotulo" id="res-metas-rotulo">Metas batidas</p></div>
       </article>
-      <article class="metrica metrica-agua">
-        <span class="metrica-icone" data-icone="gota" aria-hidden="true"></span>
-        <div><p class="metrica-valor numero" id="res-agua">—</p><p class="metrica-rotulo">Água por dia (média)</p></div>
+      <article class="metrica">
+        <span class="metrica-icone" data-icone="pulso" aria-hidden="true"></span>
+        <div><p class="metrica-valor numero" id="res-habitos">—</p><p class="metrica-rotulo">Hábitos ativos</p></div>
       </article>
-      <article class="metrica metrica-sono">
-        <span class="metrica-icone" data-icone="lua" aria-hidden="true"></span>
-        <div><p class="metrica-valor numero" id="res-sono">—</p><p class="metrica-rotulo">Sono por noite (média)</p></div>
+      <article class="metrica">
+        <span class="metrica-icone" data-icone="calendario" aria-hidden="true"></span>
+        <div><p class="metrica-valor numero" id="res-registros">—</p><p class="metrica-rotulo">Registros feitos</p></div>
       </article>
     </section>
 
-    <!-- ===================== USUÁRIOS ===================== -->
-    <section class="row g-4 secao" aria-labelledby="titulo-usuarios">
+    <!-- ===================== HÁBITOS ===================== -->
+    <section class="row g-4 secao" aria-labelledby="titulo-habitos">
       <div class="col-12">
-        <h2 id="titulo-usuarios" class="secao-titulo"><span data-icone="usuario" aria-hidden="true"></span> Usuários</h2>
-        <p class="secao-sub">Quem acompanha os hábitos. Cada pessoa tem o próprio histórico de registros.</p>
+        <h2 id="titulo-habitos" class="secao-titulo"><span data-icone="alvo" aria-hidden="true"></span> Meus hábitos</h2>
+        <p class="secao-sub">Defina o que você quer acompanhar e a meta de cada dia: treino e sono em minutos, água em ml.</p>
       </div>
 
       <div class="col-lg-4">
         <div class="card">
           <div class="card-header">
-            <h3 class="h6 mb-0">Novo ou edição</h3>
+            <h3 class="h6 mb-0">Novo hábito</h3>
           </div>
-          <form id="form-usuario" class="card-body" novalidate>
+          <form id="form-habito" class="card-body" novalidate>
             <div class="mb-3">
-              <label for="usu-nome" class="form-label">Nome</label>
-              <input id="usu-nome" name="nome" type="text" class="form-control" autocomplete="name" required>
+              <label for="hab-nome" class="form-label">Nome</label>
+              <input id="hab-nome" name="nome" type="text" class="form-control" placeholder="Ex.: Musculação" required>
             </div>
             <div class="mb-3">
-              <label for="usu-email" class="form-label">E-mail</label>
-              <input id="usu-email" name="email" type="email" class="form-control" autocomplete="email" required>
+              <label for="hab-tipo" class="form-label">Tipo</label>
+              <select id="hab-tipo" name="tipo" class="form-select" aria-describedby="ajuda-tipo" required>
+                <option value="treino">Treino (minutos)</option>
+                <option value="agua">Água (ml)</option>
+                <option value="sono">Sono (minutos)</option>
+              </select>
+              <div id="ajuda-tipo" class="form-text">O tipo define a cor e a unidade. Não muda depois de criado.</div>
+            </div>
+            <div class="mb-3">
+              <label for="hab-meta" class="form-label">Meta por dia</label>
+              <div class="input-group">
+                <input id="hab-meta" name="meta" type="number" min="1" step="1" class="form-control"
+                  aria-describedby="unid-meta" required>
+                <span id="unid-meta" class="input-group-text">min</span>
+              </div>
             </div>
             <div class="d-flex gap-2">
-              <button id="usu-salvar" type="submit" class="btn btn-primary">Cadastrar usuário</button>
-              <button id="usu-cancelar" type="button" class="btn btn-outline-secondary d-none">Cancelar</button>
+              <button id="hab-salvar" type="submit" class="btn btn-primary">Cadastrar hábito</button>
+              <button id="hab-cancelar" type="button" class="btn btn-outline-secondary d-none">Cancelar</button>
             </div>
           </form>
         </div>
@@ -108,34 +121,34 @@
         <div class="card">
           <div class="card-body">
             <!-- Os quatro estados da lista: só um aparece por vez -->
-            <div id="usuarios-carregando" class="estado" role="status">
+            <div id="habitos-carregando" class="estado" role="status">
               <div class="spinner-border text-primary" aria-hidden="true"></div>
-              <p class="estado-texto">Carregando usuários…</p>
+              <p class="estado-texto">Carregando hábitos…</p>
             </div>
 
-            <div id="usuarios-erro" class="estado estado-erro d-none" role="alert">
+            <div id="habitos-erro" class="estado estado-erro d-none" role="alert">
               <span class="estado-icone" data-icone="alerta" aria-hidden="true"></span>
-              <p id="usuarios-erro-msg" class="estado-texto"></p>
-              <button id="usuarios-recarregar" type="button" class="btn btn-sm btn-outline-danger">Tentar de novo</button>
+              <p id="habitos-erro-msg" class="estado-texto"></p>
+              <button id="habitos-recarregar" type="button" class="btn btn-sm btn-outline-danger">Tentar de novo</button>
             </div>
 
-            <div id="usuarios-vazio" class="estado d-none">
-              <span class="estado-icone" data-icone="usuario" aria-hidden="true"></span>
-              <p class="estado-titulo">Nenhum usuário ainda</p>
-              <p class="estado-texto">Cadastre o primeiro no formulário ao lado.</p>
+            <div id="habitos-vazio" class="estado d-none">
+              <span class="estado-icone" data-icone="alvo" aria-hidden="true"></span>
+              <p class="estado-titulo">Nenhum hábito ainda</p>
+              <p class="estado-texto">Crie o primeiro no formulário ao lado, como "Beber água" com meta de 2000 ml.</p>
             </div>
 
-            <div id="usuarios-sucesso" class="table-responsive d-none">
+            <div id="habitos-sucesso" class="table-responsive d-none">
               <table class="table table-hover align-middle mb-0 tabela-cartoes">
-                <caption class="visually-hidden">Lista de usuários cadastrados</caption>
+                <caption class="visually-hidden">Hábitos cadastrados e suas metas diárias</caption>
                 <thead>
                   <tr>
-                    <th scope="col">Usuário</th>
-                    <th scope="col">E-mail</th>
+                    <th scope="col">Hábito</th>
+                    <th scope="col">Meta por dia</th>
                     <th scope="col" class="text-end">Ações</th>
                   </tr>
                 </thead>
-                <tbody id="usuarios-linhas"></tbody>
+                <tbody id="habitos-linhas"></tbody>
               </table>
             </div>
           </div>
@@ -143,23 +156,23 @@
       </div>
     </section>
 
-    <!-- ===================== REGISTROS DIÁRIOS ===================== -->
+    <!-- ===================== REGISTROS ===================== -->
     <section class="row g-4 secao" aria-labelledby="titulo-registros">
       <div class="col-12">
-        <h2 id="titulo-registros" class="secao-titulo"><span data-icone="calendario" aria-hidden="true"></span> Registros diários</h2>
-        <p class="secao-sub">Um registro por pessoa por dia. Meta de referência: 2 litros de água e 7 a 9 horas de sono.</p>
+        <h2 id="titulo-registros" class="secao-titulo"><span data-icone="calendario" aria-hidden="true"></span> Registros do dia a dia</h2>
+        <p class="secao-sub">Um registro por hábito por dia. A barra mostra o quanto da meta você cumpriu.</p>
       </div>
 
       <div class="col-lg-4">
         <div class="card">
           <div class="card-header">
-            <h3 class="h6 mb-0">Registrar um dia</h3>
+            <h3 class="h6 mb-0">Registrar</h3>
           </div>
           <form id="form-registro" class="card-body" novalidate>
             <div class="mb-3">
-              <label for="reg-usuario" class="form-label">Usuário</label>
-              <!-- As opções vêm da lista de usuários, via JS -->
-              <select id="reg-usuario" name="usuarioId" class="form-select" required>
+              <label for="reg-habito" class="form-label">Hábito</label>
+              <!-- As opções vêm da lista de hábitos, via JS -->
+              <select id="reg-habito" name="habitoId" class="form-select" required>
                 <option value="">Selecione…</option>
               </select>
             </div>
@@ -167,30 +180,17 @@
               <label for="reg-data" class="form-label">Data</label>
               <input id="reg-data" name="data" type="date" class="form-control" required>
             </div>
-            <div class="form-check form-switch mb-3">
-              <input id="reg-academia" name="foiAcademia" type="checkbox" role="switch" class="form-check-input">
-              <label for="reg-academia" class="form-check-label">Foi à academia</label>
-            </div>
             <div class="mb-3">
-              <label for="reg-agua" class="form-label">Água consumida</label>
+              <label for="reg-valor" class="form-label">Quanto você fez</label>
               <div class="input-group">
-                <input id="reg-agua" name="aguaConsumidaMl" type="number" min="0" step="1"
-                  class="form-control" aria-describedby="ajuda-agua unid-agua">
-                <span id="unid-agua" class="input-group-text">ml</span>
+                <input id="reg-valor" name="valor" type="number" min="0" step="1" class="form-control"
+                  aria-describedby="ajuda-valor unid-valor" required>
+                <span id="unid-valor" class="input-group-text">—</span>
               </div>
-              <div id="ajuda-agua" class="form-text">Opcional. Ex.: 2000 para 2 litros.</div>
-            </div>
-            <div class="mb-3">
-              <label for="reg-sono" class="form-label">Sono</label>
-              <div class="input-group">
-                <input id="reg-sono" name="duracaoSonoMinutos" type="number" min="0" max="1440" step="1"
-                  class="form-control" aria-describedby="ajuda-sono unid-sono">
-                <span id="unid-sono" class="input-group-text">min</span>
-              </div>
-              <div id="ajuda-sono" class="form-text">Opcional. Ex.: 480 para 8 horas de sono.</div>
+              <div id="ajuda-valor" class="form-text">Escolha um hábito para ver a unidade e a meta.</div>
             </div>
             <div class="d-flex gap-2">
-              <button id="reg-salvar" type="submit" class="btn btn-primary">Registrar dia</button>
+              <button id="reg-salvar" type="submit" class="btn btn-primary">Registrar</button>
               <button id="reg-cancelar" type="button" class="btn btn-outline-secondary d-none">Cancelar</button>
             </div>
           </form>
@@ -214,18 +214,17 @@
             <div id="registros-vazio" class="estado d-none">
               <span class="estado-icone" data-icone="calendario" aria-hidden="true"></span>
               <p class="estado-titulo">Nenhum registro ainda</p>
-              <p class="estado-texto">Cadastre um usuário e registre o primeiro dia.</p>
+              <p class="estado-texto">Crie um hábito e registre o seu primeiro dia.</p>
             </div>
 
             <div id="registros-sucesso" class="table-responsive d-none">
               <table class="table table-hover align-middle mb-0 tabela-cartoes">
-                <caption class="visually-hidden">Registros diários de academia, água e sono</caption>
+                <caption class="visually-hidden">Registros diários por hábito, com o progresso da meta</caption>
                 <thead>
                   <tr>
                     <th scope="col">Quando</th>
-                    <th scope="col">Treino</th>
-                    <th scope="col">Água</th>
-                    <th scope="col">Sono</th>
+                    <th scope="col">Hábito</th>
+                    <th scope="col">Progresso</th>
                     <th scope="col" class="text-end">Ações</th>
                   </tr>
                 </thead>
