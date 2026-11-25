@@ -1,4 +1,5 @@
 import { usuarioModel } from '../models/usuarioModel.js';
+import { registroDiarioModel } from '../models/registroDiarioModel.js';
 import { erro } from '../utils/erro.js';
 
 export const usuarioService = {
@@ -29,6 +30,10 @@ export const usuarioService = {
   },
 
   remover(id) {
+    // Regra nova (S5): usuário com registros diários não pode ser removido
+    if (registroDiarioModel.listarPorUsuario(id).length > 0) {
+      throw erro(409, 'Usuário possui registros diários. Remova os registros primeiro.');
+    }
     const removido = usuarioModel.remover(id);
     if (!removido) throw erro(404, 'Usuário não encontrado');
   },

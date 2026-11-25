@@ -1,36 +1,42 @@
-// "Banco de dados" em memória: um array. Na S5 vira SQLite.
-let usuarios = [];
-let proximoId = 1;
+import { db } from '../db.js';
+
+// Mesmo contrato da S3 (listar, buscarPorId, existeEmail, inserir,
+// atualizar, remover). Só o "como" mudou: o array virou tabela.
+// No banco: snake_case (criado_em). No JSON da API: camelCase (criadoEm).
+const COLUNAS = 'id, nome, email, criado_em AS criadoEm';
 
 export const usuarioModel = {
   listar() {
-    return usuarios;
+    return db.prepare(`SELECT ${COLUNAS} FROM usuarios ORDER BY id`).all();
   },
 
   buscarPorId(id) {
-    return usuarios.find((u) => u.id === id) ?? null;
+    return db.prepare(`SELECT ${COLUNAS} FROM usuarios WHERE id = ?`).get(id) ?? null;
   },
 
   existeEmail(email) {
-    return usuarios.some((u) => u.email === email);
+    const linha = db.prepare('SELECT 1 FROM usuarios WHERE email = ?').get(email);
+    return linha !== undefined;
   },
 
   inserir({ nome, email }) {
-    const novo = { id: proximoId++, nome, email, criadoEm: new Date().toISOString() };
-    usuarios.push(novo);
-    return novo;
+    const r = db
+      .prepare('INSERT INTO usuarios (nome, email, criado_em) VALUES (?, ?, ?)')
+      .run(nome, email, new Date().toISOString());
+    return this.buscarPorId(r.lastInsertRowid);
   },
 
   atualizar(id, dados) {
-    const i = usuarios.findIndex((u) => u.id === id);
-    if (i === -1) return null;
-    usuarios[i] = { ...usuarios[i], ...dados, id }; // o id nunca muda
-    return usuarios[i];
+    const atual = this.buscarPorId(id);
+    if (!atual) return null;
+    const novo = { ...atual, ...dados };
+    db.prepare('UPDATE usuarios SET nome = ?, email = ? WHERE id = ?')
+      .run(novo.nome, novo.email, id); // o id nunca muda
+    return this.buscarPorId(id);
   },
 
   remover(id) {
-    const antes = usuarios.length;
-    usuarios = usuarios.filter((u) => u.id !== id);
-    return usuarios.length < antes; // true = removeu
+    const r = db.prepare('DELETE FROM usuarios WHERE id = ?').run(id);
+    return r.changes > 0; // true = removeu
   },
 };
