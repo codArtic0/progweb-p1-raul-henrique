@@ -18,6 +18,6 @@ export const resumoView = {
     el.metas.textContent = resumo && resumo.percentualMetas !== null
       ? `${resumo.percentualMetas}%` : SEM_DADO;
     el.metasRotulo.textContent = resumo
-      ? `Metas batidas (${resumo.metasBatidas} de ${resumo.registros})` : 'Metas batidas';
+      ? `${resumo.metasBatidas} de ${resumo.registros} registros` : 'dos registros';
   },
 };

@@ -6,7 +6,13 @@ import { formatarData } from '../utils/datas.js';
 const el = {
   cartoes: document.querySelector('#hoje-cartoes'),
   faixa: document.querySelector('#historico-faixa'),
+  data: document.querySelector('#data-hoje'),
 };
+
+// Cabeçalho da página: a data de hoje por extenso
+el.data.textContent = new Date().toLocaleDateString('pt-BR', {
+  weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+});
 
 const NS = 'http://www.w3.org/2000/svg';
 const RAIO = 34;

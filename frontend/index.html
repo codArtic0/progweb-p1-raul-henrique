@@ -1,20 +1,23 @@
 <!DOCTYPE html>
-<html lang="pt-BR" data-bs-theme="light">
+<html lang="pt-BR" data-bs-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="light dark">
+  <meta name="color-scheme" content="dark light">
   <meta name="description" content="TrackerFit: seu tracker pessoal de hábitos fitness (treino, água e sono).">
   <title>TrackerFit · seu tracker pessoal de hábitos</title>
   <!-- Favicon em SVG, embutido: sem arquivo extra -->
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%230f766e'/%3E%3Cpath d='M5 17h5l3-8 5 14 3-6h6' fill='none' stroke='white' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%230b0b0c'/%3E%3Cpath d='M4 17h6l3-8 5 14 3-6h7' fill='none' stroke='%23c8f031' stroke-width='2.6' stroke-linecap='square' stroke-linejoin='miter'/%3E%3C/svg%3E">
+  <!-- Fontes: Inter (texto) e JetBrains Mono (números e rótulos). Sem elas, cai nas fontes do sistema. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
   <!-- Aplica o tema salvo ANTES de pintar a página: evita o "flash" claro -->
   <script>
     try {
       const t = localStorage.getItem('tema');
-      if (t === 'dark' || t === 'light') document.documentElement.dataset.bsTheme = t;
-      else if (matchMedia('(prefers-color-scheme: dark)').matches) document.documentElement.dataset.bsTheme = 'dark';
-    } catch { /* sem localStorage: fica no tema claro */ }
+      document.documentElement.dataset.bsTheme = t === 'light' ? 'light' : 'dark';
+    } catch { /* sem localStorage: fica no tema escuro */ }
   </script>
   <!-- Bootstrap 5.3.8 via CDN, com SRI: o navegador confere o hash do arquivo -->
   <link rel="stylesheet"
@@ -31,55 +34,58 @@
   <!-- ===================== TOPO: marca + navegação ===================== -->
   <header class="topo">
     <nav class="container topo-nav" aria-label="Principal">
-      <a class="marca" href="#conteudo" aria-label="Tracker Fitness, início">
-        <span class="marca-logo" data-icone="pulso" aria-hidden="true"></span>
-        <span class="marca-nome">Tracker<strong>Fit</strong></span>
+      <a class="marca" href="#conteudo" aria-label="TrackerFit, início">
+        <span class="marca-quadrado" aria-hidden="true"></span>
+        <span class="marca-nome">trackerfit</span>
       </a>
       <ul class="topo-links">
-        <li><a href="#resumo">Resumo</a></li>
-        <li><a href="#titulo-hoje">Hoje</a></li>
-        <li><a href="#titulo-habitos">Hábitos</a></li>
-        <li><a href="#titulo-registros">Registros</a></li>
+        <li><a href="#titulo-hoje">hoje</a></li>
+        <li><a href="#titulo-habitos">hábitos</a></li>
+        <li><a href="#titulo-registros">registros</a></li>
       </ul>
       <button id="alternar-tema" type="button" class="btn-tema" aria-label="Alternar tema claro e escuro">
         <span data-icone="lua" aria-hidden="true"></span>
       </button>
     </nav>
-
-    <div class="container topo-hero">
-      <h1>Um dia de cada vez.</h1>
-      <p>Defina metas de treino, água e sono, registre o seu dia e veja a constância aparecer.</p>
-    </div>
   </header>
 
   <main id="conteudo" class="container" tabindex="-1">
     <!-- Resultado das ações (criar, editar, remover) -->
     <div id="aviso" class="alert d-none aviso-flutuante" role="status" aria-live="polite"></div>
 
+    <div class="pagina-cabecalho">
+      <h1>Painel pessoal</h1>
+      <p class="pagina-data"><time id="data-hoje"></time></p>
+    </div>
+
     <!-- ===================== RESUMO (derivado dos dados) ===================== -->
     <section id="resumo" class="resumo" aria-label="Resumo geral">
-      <article class="metrica metrica-chama">
-        <span class="metrica-icone" data-icone="chama" aria-hidden="true"></span>
-        <div><p class="metrica-valor numero" id="res-sequencia">—</p><p class="metrica-rotulo">Dias seguidos com meta</p></div>
-      </article>
-      <article class="metrica metrica-ok">
-        <span class="metrica-icone" data-icone="alvo" aria-hidden="true"></span>
-        <div><p class="metrica-valor numero" id="res-metas">—</p><p class="metrica-rotulo" id="res-metas-rotulo">Metas batidas</p></div>
+      <article class="metrica">
+        <p class="metrica-rotulo">Sequência</p>
+        <p class="metrica-valor numero" id="res-sequencia">—</p>
+        <p class="metrica-nota">dias seguidos com meta</p>
       </article>
       <article class="metrica">
-        <span class="metrica-icone" data-icone="pulso" aria-hidden="true"></span>
-        <div><p class="metrica-valor numero" id="res-habitos">—</p><p class="metrica-rotulo">Hábitos ativos</p></div>
+        <p class="metrica-rotulo">Metas batidas</p>
+        <p class="metrica-valor numero" id="res-metas">—</p>
+        <p class="metrica-nota" id="res-metas-rotulo">dos registros</p>
       </article>
       <article class="metrica">
-        <span class="metrica-icone" data-icone="calendario" aria-hidden="true"></span>
-        <div><p class="metrica-valor numero" id="res-registros">—</p><p class="metrica-rotulo">Registros feitos</p></div>
+        <p class="metrica-rotulo">Hábitos</p>
+        <p class="metrica-valor numero" id="res-habitos">—</p>
+        <p class="metrica-nota">ativos</p>
+      </article>
+      <article class="metrica">
+        <p class="metrica-rotulo">Registros</p>
+        <p class="metrica-valor numero" id="res-registros">—</p>
+        <p class="metrica-nota">no total</p>
       </article>
     </section>
 
     <!-- ===================== HOJE ===================== -->
     <section class="secao" aria-labelledby="titulo-hoje">
-      <p class="secao-sobretitulo">Painel</p>
-      <h2 id="titulo-hoje" class="secao-titulo"><span data-icone="chama" aria-hidden="true"></span> Hoje</h2>
+      <p class="secao-sobretitulo">01</p>
+      <h2 id="titulo-hoje" class="secao-titulo">Hoje</h2>
       <div id="hoje-cartoes" class="hoje-grade" aria-live="polite"></div>
 
       <div class="historico">
@@ -94,9 +100,9 @@
     <!-- ===================== HÁBITOS ===================== -->
     <section class="row g-4 secao" aria-labelledby="titulo-habitos">
       <div class="col-12">
-        <p class="secao-sobretitulo">Metas</p>
-        <h2 id="titulo-habitos" class="secao-titulo"><span data-icone="alvo" aria-hidden="true"></span> Meus hábitos</h2>
-        <p class="secao-sub">Defina o que você quer acompanhar e a meta de cada dia: treino e sono em minutos, água em ml.</p>
+        <p class="secao-sobretitulo">02</p>
+        <h2 id="titulo-habitos" class="secao-titulo">Hábitos</h2>
+        <p class="secao-sub">O que você acompanha e a meta de cada dia. Treino e sono em minutos, água em ml.</p>
       </div>
 
       <div class="col-lg-4">
@@ -176,9 +182,9 @@
     <!-- ===================== REGISTROS ===================== -->
     <section class="row g-4 secao" aria-labelledby="titulo-registros">
       <div class="col-12">
-        <p class="secao-sobretitulo">Histórico</p>
-        <h2 id="titulo-registros" class="secao-titulo"><span data-icone="calendario" aria-hidden="true"></span> Registros do dia a dia</h2>
-        <p class="secao-sub">Um registro por hábito por dia. A barra mostra o quanto da meta você cumpriu.</p>
+        <p class="secao-sobretitulo">03</p>
+        <h2 id="titulo-registros" class="secao-titulo">Registros</h2>
+        <p class="secao-sub">Um registro por hábito por dia. A barra mostra quanto da meta foi cumprida.</p>
       </div>
 
       <div class="col-lg-4">
@@ -257,7 +263,7 @@
 
   <footer class="rodape">
     <div class="container">
-      <span class="marca-nome">Tracker<strong>Fit</strong></span>
+      <span class="marca-nome">trackerfit</span>
       <span>Projeto 1 · Programação Web · UEPB · 2026.2</span>
     </div>
   </footer>
