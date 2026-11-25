@@ -1,5 +1,7 @@
 // Camada de UI: a única que toca no DOM dos usuários.
 // Não faz fetch e não valida regra: desenha o estado e avisa dos eventos.
+import { icone } from './icones.js';
+
 const el = {
   form: document.querySelector('#form-usuario'),
   salvar: document.querySelector('#usu-salvar'),
@@ -13,20 +15,38 @@ const el = {
   linhas: document.querySelector('#usuarios-linhas'),
 };
 
-function celula(texto, classe = '') {
+function celula(classe = '', rotulo = '') {
   const td = document.createElement('td');
-  td.textContent = texto; // dado do usuário entra como TEXTO, nunca como HTML
   td.className = classe;
+  if (rotulo) td.dataset.rotulo = rotulo; // usado pelo layout de cartões no celular
   return td;
 }
 
-function botao(texto, acao, id, classe) {
+// Iniciais do nome: "Ana Lima" → "AL"
+function iniciais(nome) {
+  const partes = nome.trim().split(/\s+/);
+  const primeira = partes[0]?.[0] ?? '?';
+  const ultima = partes.length > 1 ? partes[partes.length - 1][0] : '';
+  return (primeira + ultima).toUpperCase();
+}
+
+function avatar(usuario) {
+  const a = document.createElement('span');
+  a.className = `avatar avatar-${usuario.id % 5}`; // cor estável por usuário
+  a.textContent = iniciais(usuario.nome);
+  a.setAttribute('aria-hidden', 'true');
+  return a;
+}
+
+function botao(rotulo, nomeIcone, acao, id, classe) {
   const b = document.createElement('button');
   b.type = 'button';
-  b.textContent = texto;
-  b.className = `btn btn-sm ${classe}`;
+  b.className = `btn btn-sm btn-icone ${classe}`;
   b.dataset.acao = acao;
   b.dataset.id = id;
+  b.setAttribute('aria-label', rotulo);
+  b.title = rotulo;
+  b.append(icone(nomeIcone));
   return b;
 }
 
@@ -34,13 +54,32 @@ function linha(usuario, editandoId) {
   const tr = document.createElement('tr');
   if (usuario.id === editandoId) tr.className = 'editando';
 
-  const acoes = celula('', 'text-end text-nowrap');
+  // Nome (dado do usuário) entra como TEXTO, nunca como HTML
+  const quem = celula('celula-principal');
+  const nome = document.createElement('span');
+  nome.className = 'fw-semibold';
+  nome.textContent = usuario.nome;
+  const id = document.createElement('small');
+  id.className = 'text-body-secondary numero';
+  id.textContent = `#${usuario.id}`;
+  const bloco = document.createElement('span');
+  bloco.className = 'd-flex flex-column';
+  bloco.append(nome, id);
+  const grupo = document.createElement('span');
+  grupo.className = 'd-flex align-items-center gap-3';
+  grupo.append(avatar(usuario), bloco);
+  quem.append(grupo);
+
+  const email = celula('text-break', 'E-mail');
+  email.textContent = usuario.email;
+
+  const acoes = celula('text-end text-nowrap celula-acoes');
   acoes.append(
-    botao('Editar', 'editar', usuario.id, 'btn-outline-primary me-1'),
-    botao('Remover', 'remover', usuario.id, 'btn-outline-danger'),
+    botao(`Editar ${usuario.nome}`, 'lapis', 'editar', usuario.id, 'btn-outline-primary me-1'),
+    botao(`Remover ${usuario.nome}`, 'lixeira', 'remover', usuario.id, 'btn-outline-danger'),
   );
 
-  tr.append(celula(usuario.id), celula(usuario.nome), celula(usuario.email), acoes);
+  tr.append(quem, email, acoes);
   return tr;
 }
 

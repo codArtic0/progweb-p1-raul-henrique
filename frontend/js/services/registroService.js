@@ -26,9 +26,32 @@ function prepararCriacao(dados) {
   return { usuarioId: Number(dados.usuarioId), data: dados.data, ...camposEditaveis(dados) };
 }
 
+// Metas de referência (regra da tela, não da API)
+const META_AGUA_ML = 2000;
+const SONO_IDEAL_MIN = [420, 540]; // 7h a 9h
+
+// Acrescenta ao registro o que a tela precisa para desenhar: % da meta de água
+// e a faixa do sono ('baixo' | 'ideal' | 'alto' | null quando não informado).
+export function enriquecer(registro) {
+  const sono = registro.duracaoSonoMinutos;
+  let sonoFaixa = null;
+  if (sono != null) {
+    if (sono < SONO_IDEAL_MIN[0]) sonoFaixa = 'baixo';
+    else if (sono > SONO_IDEAL_MIN[1]) sonoFaixa = 'alto';
+    else sonoFaixa = 'ideal';
+  }
+  return {
+    ...registro,
+    aguaPct: Math.min(100, Math.round((registro.aguaConsumidaMl / META_AGUA_ML) * 100)),
+    sonoFaixa,
+  };
+}
+
 export const registroService = {
-  listar() {
-    return api.get('/registros');
+  async listar() {
+    const lista = await api.get('/registros');
+    // mais recentes primeiro: é o que a pessoa quer ver
+    return lista.map(enriquecer).sort((a, b) => b.data.localeCompare(a.data) || b.id - a.id);
   },
 
   async criar(dados) {

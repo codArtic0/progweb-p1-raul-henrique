@@ -1,9 +1,21 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-bs-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Tracker Fitness</title>
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="Tracker Fitness: acompanhe treino, água e sono, dia após dia.">
+  <title>Tracker Fitness · treino, água e sono</title>
+  <!-- Favicon em SVG, embutido: sem arquivo extra -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%230f766e'/%3E%3Cpath d='M5 17h5l3-8 5 14 3-6h6' fill='none' stroke='white' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <!-- Aplica o tema salvo ANTES de pintar a página: evita o "flash" claro -->
+  <script>
+    try {
+      const t = localStorage.getItem('tema');
+      if (t === 'dark' || t === 'light') document.documentElement.dataset.bsTheme = t;
+      else if (matchMedia('(prefers-color-scheme: dark)').matches) document.documentElement.dataset.bsTheme = 'dark';
+    } catch { /* sem localStorage: fica no tema claro */ }
+  </script>
   <!-- Bootstrap 5.3.8 via CDN, com SRI: o navegador confere o hash do arquivo -->
   <link rel="stylesheet"
     href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
@@ -12,36 +24,77 @@
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/tema.css">
 </head>
-<body class="bg-body-tertiary">
+<body>
   <!-- Aparece só ao navegar por Tab: pula direto para o conteúdo -->
   <a class="visually-hidden-focusable pular-conteudo" href="#conteudo">Pular para o conteúdo</a>
 
-  <header class="topo text-white py-4 mb-4">
-    <div class="container">
-      <h1 class="h3 mb-0">Tracker Fitness</h1>
-      <p class="mb-0 small">Acompanhe academia, água e sono · SPA em Vanilla JS</p>
+  <!-- ===================== TOPO: marca + navegação ===================== -->
+  <header class="topo">
+    <nav class="container topo-nav" aria-label="Principal">
+      <a class="marca" href="#conteudo" aria-label="Tracker Fitness, início">
+        <span class="marca-logo" data-icone="pulso" aria-hidden="true"></span>
+        <span class="marca-nome">Tracker<strong>Fit</strong></span>
+      </a>
+      <ul class="topo-links">
+        <li><a href="#resumo">Resumo</a></li>
+        <li><a href="#titulo-usuarios">Usuários</a></li>
+        <li><a href="#titulo-registros">Registros</a></li>
+      </ul>
+      <button id="alternar-tema" type="button" class="btn-tema" aria-label="Alternar tema claro e escuro">
+        <span data-icone="lua" aria-hidden="true"></span>
+      </button>
+    </nav>
+
+    <div class="container topo-hero">
+      <h1>Seu dia em três números.</h1>
+      <p>Treino, água e sono: registre em segundos e veja a constância aparecer.</p>
     </div>
   </header>
 
   <main id="conteudo" class="container" tabindex="-1">
     <!-- Resultado das ações (criar, editar, remover) -->
-    <div id="aviso" class="alert d-none" role="status" aria-live="polite"></div>
+    <div id="aviso" class="alert d-none aviso-flutuante" role="status" aria-live="polite"></div>
+
+    <!-- ===================== RESUMO (derivado dos dados) ===================== -->
+    <section id="resumo" class="resumo" aria-label="Resumo geral">
+      <article class="metrica metrica-usuario">
+        <span class="metrica-icone" data-icone="usuario" aria-hidden="true"></span>
+        <div><p class="metrica-valor numero" id="res-usuarios">—</p><p class="metrica-rotulo">Usuários</p></div>
+      </article>
+      <article class="metrica metrica-treino">
+        <span class="metrica-icone" data-icone="halter" aria-hidden="true"></span>
+        <div><p class="metrica-valor numero" id="res-treinos">—</p><p class="metrica-rotulo">Dias de treino</p></div>
+      </article>
+      <article class="metrica metrica-agua">
+        <span class="metrica-icone" data-icone="gota" aria-hidden="true"></span>
+        <div><p class="metrica-valor numero" id="res-agua">—</p><p class="metrica-rotulo">Água por dia (média)</p></div>
+      </article>
+      <article class="metrica metrica-sono">
+        <span class="metrica-icone" data-icone="lua" aria-hidden="true"></span>
+        <div><p class="metrica-valor numero" id="res-sono">—</p><p class="metrica-rotulo">Sono por noite (média)</p></div>
+      </article>
+    </section>
 
     <!-- ===================== USUÁRIOS ===================== -->
-    <section class="row g-4 mb-5" aria-labelledby="titulo-usuarios">
+    <section class="row g-4 secao" aria-labelledby="titulo-usuarios">
+      <div class="col-12">
+        <h2 id="titulo-usuarios" class="secao-titulo"><span data-icone="usuario" aria-hidden="true"></span> Usuários</h2>
+        <p class="secao-sub">Quem acompanha os hábitos. Cada pessoa tem o próprio histórico de registros.</p>
+      </div>
+
       <div class="col-lg-4">
-        <div class="card shadow-sm">
+        <div class="card">
           <div class="card-header">
-            <h2 id="titulo-usuarios" class="h5 mb-0">Usuários</h2>
+            <h3 class="h6 mb-0">Novo ou edição</h3>
           </div>
           <form id="form-usuario" class="card-body" novalidate>
             <div class="mb-3">
               <label for="usu-nome" class="form-label">Nome</label>
-              <input id="usu-nome" name="nome" type="text" class="form-control" required>
+              <input id="usu-nome" name="nome" type="text" class="form-control" autocomplete="name" required>
             </div>
             <div class="mb-3">
               <label for="usu-email" class="form-label">E-mail</label>
-              <input id="usu-email" name="email" type="email" class="form-control" required>
+              <input id="usu-email" name="email" type="email" class="form-control" autocomplete="email" required>
             </div>
             <div class="d-flex gap-2">
               <button id="usu-salvar" type="submit" class="btn btn-primary">Cadastrar usuário</button>
@@ -52,30 +105,32 @@
       </div>
 
       <div class="col-lg-8">
-        <div class="card shadow-sm">
+        <div class="card">
           <div class="card-body">
             <!-- Os quatro estados da lista: só um aparece por vez -->
-            <div id="usuarios-carregando" class="text-center py-4">
+            <div id="usuarios-carregando" class="estado" role="status">
               <div class="spinner-border text-primary" aria-hidden="true"></div>
-              <p class="text-body-secondary mt-2 mb-0">Carregando usuários…</p>
+              <p class="estado-texto">Carregando usuários…</p>
             </div>
 
-            <div id="usuarios-erro" class="alert alert-danger mb-0 d-none" role="alert">
-              <p id="usuarios-erro-msg" class="mb-2"></p>
+            <div id="usuarios-erro" class="estado estado-erro d-none" role="alert">
+              <span class="estado-icone" data-icone="alerta" aria-hidden="true"></span>
+              <p id="usuarios-erro-msg" class="estado-texto"></p>
               <button id="usuarios-recarregar" type="button" class="btn btn-sm btn-outline-danger">Tentar de novo</button>
             </div>
 
-            <p id="usuarios-vazio" class="text-body-secondary text-center py-4 mb-0 d-none">
-              Nenhum usuário ainda. Cadastre o primeiro no formulário.
-            </p>
+            <div id="usuarios-vazio" class="estado d-none">
+              <span class="estado-icone" data-icone="usuario" aria-hidden="true"></span>
+              <p class="estado-titulo">Nenhum usuário ainda</p>
+              <p class="estado-texto">Cadastre o primeiro no formulário ao lado.</p>
+            </div>
 
             <div id="usuarios-sucesso" class="table-responsive d-none">
-              <table class="table table-hover align-middle mb-0">
+              <table class="table table-hover align-middle mb-0 tabela-cartoes">
                 <caption class="visually-hidden">Lista de usuários cadastrados</caption>
                 <thead>
                   <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">Nome</th>
+                    <th scope="col">Usuário</th>
                     <th scope="col">E-mail</th>
                     <th scope="col" class="text-end">Ações</th>
                   </tr>
@@ -89,11 +144,16 @@
     </section>
 
     <!-- ===================== REGISTROS DIÁRIOS ===================== -->
-    <section class="row g-4 mb-5" aria-labelledby="titulo-registros">
+    <section class="row g-4 secao" aria-labelledby="titulo-registros">
+      <div class="col-12">
+        <h2 id="titulo-registros" class="secao-titulo"><span data-icone="calendario" aria-hidden="true"></span> Registros diários</h2>
+        <p class="secao-sub">Um registro por pessoa por dia. Meta de referência: 2 litros de água e 7 a 9 horas de sono.</p>
+      </div>
+
       <div class="col-lg-4">
-        <div class="card shadow-sm">
+        <div class="card">
           <div class="card-header">
-            <h2 id="titulo-registros" class="h5 mb-0">Registros diários</h2>
+            <h3 class="h6 mb-0">Registrar um dia</h3>
           </div>
           <form id="form-registro" class="card-body" novalidate>
             <div class="mb-3">
@@ -107,20 +167,26 @@
               <label for="reg-data" class="form-label">Data</label>
               <input id="reg-data" name="data" type="date" class="form-control" required>
             </div>
-            <div class="form-check mb-3">
-              <input id="reg-academia" name="foiAcademia" type="checkbox" class="form-check-input">
+            <div class="form-check form-switch mb-3">
+              <input id="reg-academia" name="foiAcademia" type="checkbox" role="switch" class="form-check-input">
               <label for="reg-academia" class="form-check-label">Foi à academia</label>
             </div>
             <div class="mb-3">
-              <label for="reg-agua" class="form-label">Água consumida (ml)</label>
-              <input id="reg-agua" name="aguaConsumidaMl" type="number" min="0" step="1"
-                class="form-control" aria-describedby="ajuda-agua">
+              <label for="reg-agua" class="form-label">Água consumida</label>
+              <div class="input-group">
+                <input id="reg-agua" name="aguaConsumidaMl" type="number" min="0" step="1"
+                  class="form-control" aria-describedby="ajuda-agua unid-agua">
+                <span id="unid-agua" class="input-group-text">ml</span>
+              </div>
               <div id="ajuda-agua" class="form-text">Opcional. Ex.: 2000 para 2 litros.</div>
             </div>
             <div class="mb-3">
-              <label for="reg-sono" class="form-label">Sono (minutos)</label>
-              <input id="reg-sono" name="duracaoSonoMinutos" type="number" min="0" max="1440" step="1"
-                class="form-control" aria-describedby="ajuda-sono">
+              <label for="reg-sono" class="form-label">Sono</label>
+              <div class="input-group">
+                <input id="reg-sono" name="duracaoSonoMinutos" type="number" min="0" max="1440" step="1"
+                  class="form-control" aria-describedby="ajuda-sono unid-sono">
+                <span id="unid-sono" class="input-group-text">min</span>
+              </div>
               <div id="ajuda-sono" class="form-text">Opcional. Ex.: 480 para 8 horas de sono.</div>
             </div>
             <div class="d-flex gap-2">
@@ -132,33 +198,34 @@
       </div>
 
       <div class="col-lg-8">
-        <div class="card shadow-sm">
+        <div class="card">
           <div class="card-body">
-            <div id="registros-carregando" class="text-center py-4">
+            <div id="registros-carregando" class="estado" role="status">
               <div class="spinner-border text-primary" aria-hidden="true"></div>
-              <p class="text-body-secondary mt-2 mb-0">Carregando registros…</p>
+              <p class="estado-texto">Carregando registros…</p>
             </div>
 
-            <div id="registros-erro" class="alert alert-danger mb-0 d-none" role="alert">
-              <p id="registros-erro-msg" class="mb-2"></p>
+            <div id="registros-erro" class="estado estado-erro d-none" role="alert">
+              <span class="estado-icone" data-icone="alerta" aria-hidden="true"></span>
+              <p id="registros-erro-msg" class="estado-texto"></p>
               <button id="registros-recarregar" type="button" class="btn btn-sm btn-outline-danger">Tentar de novo</button>
             </div>
 
-            <p id="registros-vazio" class="text-body-secondary text-center py-4 mb-0 d-none">
-              Nenhum registro ainda. Cadastre um usuário e registre o primeiro dia.
-            </p>
+            <div id="registros-vazio" class="estado d-none">
+              <span class="estado-icone" data-icone="calendario" aria-hidden="true"></span>
+              <p class="estado-titulo">Nenhum registro ainda</p>
+              <p class="estado-texto">Cadastre um usuário e registre o primeiro dia.</p>
+            </div>
 
             <div id="registros-sucesso" class="table-responsive d-none">
-              <table class="table table-hover align-middle mb-0">
+              <table class="table table-hover align-middle mb-0 tabela-cartoes">
                 <caption class="visually-hidden">Registros diários de academia, água e sono</caption>
                 <thead>
                   <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">Usuário</th>
-                    <th scope="col">Data</th>
-                    <th scope="col">Academia</th>
-                    <th scope="col" class="text-end">Água</th>
-                    <th scope="col" class="text-end">Sono</th>
+                    <th scope="col">Quando</th>
+                    <th scope="col">Treino</th>
+                    <th scope="col">Água</th>
+                    <th scope="col">Sono</th>
                     <th scope="col" class="text-end">Ações</th>
                   </tr>
                 </thead>
@@ -169,11 +236,13 @@
         </div>
       </div>
     </section>
-
   </main>
 
-  <footer class="container text-body-secondary small pb-4">
-    Programação Web · UEPB · 2026.2 · Semana 4
+  <footer class="rodape">
+    <div class="container">
+      <span class="marca-nome">Tracker<strong>Fit</strong></span>
+      <span>Projeto 1 · Programação Web · UEPB · 2026.2</span>
+    </div>
   </footer>
 
   <!-- type="module": habilita import/export e só roda depois de o HTML virar DOM -->

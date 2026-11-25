@@ -4,7 +4,13 @@ import { usuarioService } from './services/usuarioService.js';
 import { registroService } from './services/registroService.js';
 import { usuarioView } from './ui/usuarioView.js';
 import { registroView } from './ui/registroView.js';
+import { calcularResumo } from './services/resumoService.js';
+import { resumoView } from './ui/resumoView.js';
+import { hidratarIcones } from './ui/icones.js';
+import './ui/tema.js'; // liga o botão de tema claro/escuro
 import { aviso } from './ui/aviso.js';
+
+hidratarIcones(); // troca os data-icone do HTML pelos SVGs
 
 // ===================== USUÁRIOS =====================
 const usuarios = criarStore({
@@ -151,6 +157,17 @@ registroView.aoEnviar(salvarRegistro);
 registroView.aoCancelar(cancelarEdicaoRegistro);
 registroView.aoRecarregar(carregarRegistros);
 registroView.aoClicarNaLista({ editar: editarRegistro, remover: removerRegistro });
+
+// ===================== RESUMO =====================
+// Deriva dos dois stores: só mostra números quando as duas listas chegaram.
+function atualizarResumo() {
+  const u = usuarios.get();
+  const r = registros.get();
+  const pronto = ['sucesso', 'vazio'].includes(u.status) && ['sucesso', 'vazio'].includes(r.status);
+  resumoView.render(pronto ? calcularResumo(u.usuarios, r.registros) : null);
+}
+usuarios.assinar(atualizarResumo);
+registros.assinar(atualizarResumo);
 
 // ===================== INÍCIO =====================
 carregarUsuarios();

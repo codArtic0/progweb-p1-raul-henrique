@@ -1,57 +1,105 @@
-/* Tema fitness do Projeto 1.
-   Vem DEPOIS do Bootstrap e do style.css: só sobrescreve variáveis e estilos,
-   sem tocar na estrutura nem no JavaScript. */
+/* Identidade visual do Tracker Fitness.
+   Vem DEPOIS do Bootstrap: define os "design tokens" (cores, raios, sombras)
+   e remapeia as variáveis do Bootstrap para eles. Nada aqui mexe no JavaScript.
+
+   Conceito: a cor de cada hábito é sempre a mesma em toda a tela.
+     treino = laranja · água = azul · sono = violeta · marca/ação = verde-azulado */
+
 :root {
-  --fit-accent: #0f766e;       /* verde-azulado: 5,5:1 sobre branco */
+  /* marca */
+  --fit-accent: #0f766e;
   --fit-accent-dark: #115e59;
   --fit-accent-rgb: 15, 118, 110;
+  --fit-ink: #0b2e2b;
+
+  /* um token por hábito: cor forte (texto/barra) e cor suave (fundo do selo) */
+  --fit-treino: #c2410c;  --fit-treino-suave: #ffedd5;
+  --fit-agua: #0369a1;    --fit-agua-suave: #e0f2fe;
+  --fit-sono: #6d28d9;    --fit-sono-suave: #ede9fe;
+  --fit-ok: #15803d;      --fit-ok-suave: #dcfce7;
+  --fit-alerta: #b45309;  --fit-alerta-suave: #fef3c7;
+  --fit-neutro-suave: #eef2f1;
+
+  --fit-raio: 1rem;
+  --fit-sombra: 0 1px 2px rgba(11, 46, 43, 0.06), 0 8px 24px rgba(11, 46, 43, 0.06);
+  --fit-fonte: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
   --bs-primary: var(--fit-accent);
   --bs-primary-rgb: var(--fit-accent-rgb);
   --bs-link-color: var(--fit-accent);
   --bs-link-color-rgb: var(--fit-accent-rgb);
   --bs-link-hover-color: var(--fit-accent-dark);
   --bs-focus-ring-color: rgba(var(--fit-accent-rgb), 0.35);
-  --bs-body-bg: #f4f7f6;
-  --bs-tertiary-bg: #f4f7f6;
+  --bs-body-font-family: var(--fit-fonte);
+  --bs-body-bg: #f3f7f6;
+  --bs-body-color: #16302d;
+  --bs-border-radius: 0.6rem;
 }
 
-/* Cabeçalho com degradê */
-.topo {
-  background: linear-gradient(135deg, #0b3d3a 0%, var(--fit-accent) 100%);
-}
-.topo h1 {
-  font-weight: 700;
-  letter-spacing: -0.01em;
-}
-.topo p {
-  opacity: 0.9;
+/* Tema escuro: os mesmos tokens, em tons que mantêm o contraste */
+[data-bs-theme="dark"] {
+  --fit-accent: #2dd4bf;
+  --fit-accent-dark: #5eead4;
+  --fit-accent-rgb: 45, 212, 191;
+  --fit-treino: #fdba74;  --fit-treino-suave: rgba(251, 146, 60, 0.18);
+  --fit-agua: #7dd3fc;    --fit-agua-suave: rgba(56, 189, 248, 0.16);
+  --fit-sono: #c4b5fd;    --fit-sono-suave: rgba(167, 139, 250, 0.18);
+  --fit-ok: #86efac;      --fit-ok-suave: rgba(74, 222, 128, 0.16);
+  --fit-alerta: #fcd34d;  --fit-alerta-suave: rgba(251, 191, 36, 0.16);
+  --fit-neutro-suave: rgba(255, 255, 255, 0.08);
+  --fit-sombra: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.3);
+  --bs-body-bg: #0b1614;
+  --bs-body-color: #dbe9e6;
+  --bs-secondary-bg: #12211f;
+  --bs-tertiary-bg: #12211f;
 }
 
-/* Botões e campos com a cor do tema */
+body {
+  background-color: var(--bs-body-bg);
+  font-feature-settings: "tnum" 0;
+}
+
+/* ---------- Botões e campos na cor da marca ---------- */
 .btn-primary {
+  --bs-btn-color: #fff;
   --bs-btn-bg: var(--fit-accent);
   --bs-btn-border-color: var(--fit-accent);
+  --bs-btn-hover-color: #fff;
   --bs-btn-hover-bg: var(--fit-accent-dark);
   --bs-btn-hover-border-color: var(--fit-accent-dark);
+  --bs-btn-active-color: #fff;
   --bs-btn-active-bg: var(--fit-accent-dark);
   --bs-btn-active-border-color: var(--fit-accent-dark);
   --bs-btn-disabled-bg: var(--fit-accent);
   --bs-btn-disabled-border-color: var(--fit-accent);
   --bs-btn-focus-shadow-rgb: var(--fit-accent-rgb);
+  font-weight: 600;
+}
+[data-bs-theme="dark"] .btn-primary {
+  --bs-btn-color: #04201d;
+  --bs-btn-hover-color: #04201d;
+  --bs-btn-active-color: #04201d;
 }
 .btn-outline-primary {
   --bs-btn-color: var(--fit-accent);
   --bs-btn-border-color: var(--fit-accent);
+  --bs-btn-hover-color: #fff;
   --bs-btn-hover-bg: var(--fit-accent);
   --bs-btn-hover-border-color: var(--fit-accent);
+  --bs-btn-active-color: #fff;
   --bs-btn-active-bg: var(--fit-accent-dark);
   --bs-btn-active-border-color: var(--fit-accent-dark);
   --bs-btn-disabled-color: var(--fit-accent);
   --bs-btn-disabled-border-color: var(--fit-accent);
   --bs-btn-focus-shadow-rgb: var(--fit-accent-rgb);
 }
+[data-bs-theme="dark"] .btn-outline-primary {
+  --bs-btn-hover-color: #04201d;
+  --bs-btn-active-color: #04201d;
+}
 .form-control:focus,
-.form-select:focus {
+.form-select:focus,
+.form-check-input:focus {
   border-color: var(--fit-accent);
   box-shadow: 0 0 0 0.25rem rgba(var(--fit-accent-rgb), 0.25);
 }
@@ -59,75 +107,62 @@
   background-color: var(--fit-accent);
   border-color: var(--fit-accent);
 }
-.form-check-input:focus {
-  border-color: var(--fit-accent);
-  box-shadow: 0 0 0 0.25rem rgba(var(--fit-accent-rgb), 0.25);
+.form-label {
+  font-weight: 600;
+  font-size: 0.875rem;
 }
 .spinner-border.text-primary {
   color: var(--fit-accent) !important;
 }
 
-/* Cartões: faixa de cor no topo, cabeçalho limpo */
+/* ---------- Cartões ---------- */
+[data-bs-theme="dark"] .card {
+  --bs-card-bg: var(--bs-secondary-bg);
+}
 .card {
-  border: 0;
-  border-top: 3px solid var(--fit-accent);
-  border-radius: 0.75rem;
+  --bs-card-border-width: 0;
+  --bs-card-border-radius: var(--fit-raio);
+  --bs-card-cap-bg: transparent;
+  box-shadow: var(--fit-sombra);
   overflow: hidden;
 }
 .card-header {
-  background-color: #fff;
-  font-weight: 600;
+  border-bottom: 1px solid var(--bs-border-color-translucent);
+  padding-block: 0.9rem;
+}
+.card-header h3 {
+  font-weight: 700;
 }
 
-/* Tabelas: cabeçalho discreto, linhas com respiro */
+/* ---------- Tabelas ---------- */
 thead th {
-  font-size: 0.75rem;
-  letter-spacing: 0.04em;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--bs-secondary-color);
   border-bottom-width: 2px;
+  white-space: nowrap;
 }
 .table > :not(caption) > * > * {
-  padding-top: 0.75rem;
-  padding-bottom: 0.75rem;
+  padding: 0.8rem 0.75rem;
+  background-color: transparent;
 }
 .table-hover > tbody > tr:hover > * {
-  --bs-table-hover-bg: rgba(var(--fit-accent-rgb), 0.06);
+  --bs-table-hover-bg: rgba(var(--fit-accent-rgb), 0.07);
 }
 
-/* Link "pular para o conteúdo": visível só com foco do teclado */
+/* ---------- Link "pular para o conteúdo" ---------- */
 .pular-conteudo:focus {
   position: fixed;
   top: 0.5rem;
   left: 0.5rem;
   z-index: 1080;
   padding: 0.5rem 1rem;
-  background: #fff;
+  background: var(--bs-body-bg);
   color: var(--fit-accent-dark);
   border-radius: 0.5rem;
   box-shadow: 0 0 0 3px var(--fit-accent);
 }
 main:focus {
   outline: none;
-}
-
-/* Telas de toque: alvos de pelo menos 44 px (WCAG 2.5.5) */
-@media (pointer: coarse) {
-  .btn,
-  .btn-sm {
-    min-height: 44px;
-    min-width: 44px;
-  }
-  .form-check-input {
-    width: 1.5rem;
-    height: 1.5rem;
-  }
-}
-
-/* Em telas largas e altas, o formulário acompanha a rolagem */
-@media (min-width: 992px) and (min-height: 760px) {
-  .col-lg-4 > .card {
-    position: sticky;
-    top: 1rem;
-  }
 }

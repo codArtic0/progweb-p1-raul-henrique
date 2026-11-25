@@ -1,4 +1,6 @@
 // Camada de UI dos registros diários. Mesmo molde da usuarioView, com um <select> a mais.
+import { icone } from './icones.js';
+
 const el = {
   form: document.querySelector('#form-registro'),
   usuario: document.querySelector('#reg-usuario'),
@@ -27,22 +29,34 @@ function formatarSono(minutos) {
   return `${Math.floor(minutos / 60)}h${String(minutos % 60).padStart(2, '0')}`;
 }
 
-function celula(texto, classe = '') {
+function celula(classe = '', rotulo = '') {
   const td = document.createElement('td');
-  td.textContent = texto;
   td.className = classe;
+  if (rotulo) td.dataset.rotulo = rotulo; // usado pelo layout de cartões no celular
   return td;
 }
 
-function botao(texto, acao, id, classe) {
+function botao(rotulo, nomeIcone, acao, id, classe) {
   const b = document.createElement('button');
   b.type = 'button';
-  b.textContent = texto;
-  b.className = `btn btn-sm ${classe}`;
+  b.className = `btn btn-sm btn-icone ${classe}`;
   b.dataset.acao = acao;
   b.dataset.id = id;
+  b.setAttribute('aria-label', rotulo);
+  b.title = rotulo;
+  b.append(icone(nomeIcone));
   return b;
 }
+
+// Selo (badge) com ícone e texto: a informação nunca depende só da cor.
+function selo(nomeIcone, texto, classe) {
+  const s = document.createElement('span');
+  s.className = `selo ${classe}`;
+  s.append(icone(nomeIcone), document.createTextNode(texto));
+  return s;
+}
+
+const ROTULO_SONO = { baixo: 'abaixo do ideal', ideal: 'no ideal', alto: 'acima do ideal' };
 
 function linha(registro, editandoId) {
   const tr = document.createElement('tr');
@@ -51,21 +65,56 @@ function linha(registro, editandoId) {
   const dono = nomeDoUsuario.get(registro.usuarioId)
     ?? `usuário #${registro.usuarioId} (removido)`; // registro órfão: assunto da S5
 
-  const acoes = celula('', 'text-end text-nowrap');
+  // Quando: data em destaque e o dono embaixo
+  const quando = celula('celula-principal');
+  const data = document.createElement('span');
+  data.className = 'fw-semibold numero d-block';
+  data.textContent = formatarData(registro.data);
+  const quem = document.createElement('small');
+  quem.className = 'text-body-secondary';
+  quem.textContent = dono;
+  quando.append(data, quem);
+
+  // Treino: selo com ícone
+  const treino = celula('', 'Treino');
+  treino.append(registro.foiAcademia
+    ? selo('halter', 'Treinou', 'selo-treino')
+    : selo('calendario', 'Descanso', 'selo-neutro'));
+
+  // Água: valor + barra de progresso da meta
+  const agua = celula('', 'Água');
+  const valor = document.createElement('span');
+  valor.className = 'numero d-block';
+  valor.textContent = `${registro.aguaConsumidaMl} ml`;
+  const barra = document.createElement('div');
+  barra.className = 'progress barra-agua';
+  barra.setAttribute('role', 'progressbar');
+  barra.setAttribute('aria-label', 'Meta de água do dia');
+  barra.setAttribute('aria-valuenow', registro.aguaPct);
+  barra.setAttribute('aria-valuemin', '0');
+  barra.setAttribute('aria-valuemax', '100');
+  const preenchida = document.createElement('div');
+  preenchida.className = 'progress-bar';
+  preenchida.style.width = `${registro.aguaPct}%`;
+  barra.append(preenchida);
+  agua.append(valor, barra);
+
+  // Sono: selo colorido pela faixa, com a leitura por extenso
+  const sono = celula('', 'Sono');
+  if (registro.sonoFaixa) {
+    sono.append(selo('lua', formatarSono(registro.duracaoSonoMinutos), `selo-sono-${registro.sonoFaixa}`));
+    sono.title = ROTULO_SONO[registro.sonoFaixa];
+  } else {
+    sono.textContent = '—';
+  }
+
+  const acoes = celula('text-end text-nowrap celula-acoes');
   acoes.append(
-    botao('Editar', 'editar', registro.id, 'btn-outline-primary me-1'),
-    botao('Remover', 'remover', registro.id, 'btn-outline-danger'),
+    botao(`Editar registro de ${formatarData(registro.data)}`, 'lapis', 'editar', registro.id, 'btn-outline-primary me-1'),
+    botao(`Remover registro de ${formatarData(registro.data)}`, 'lixeira', 'remover', registro.id, 'btn-outline-danger'),
   );
 
-  tr.append(
-    celula(registro.id),
-    celula(dono),
-    celula(formatarData(registro.data), 'numero text-nowrap'),
-    celula(registro.foiAcademia ? 'Sim' : 'Não'),
-    celula(`${registro.aguaConsumidaMl} ml`, 'numero text-end text-nowrap'),
-    celula(formatarSono(registro.duracaoSonoMinutos), 'numero text-end text-nowrap'),
-    acoes,
-  );
+  tr.append(quando, treino, agua, sono, acoes);
   return tr;
 }
 
