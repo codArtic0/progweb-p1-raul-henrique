@@ -1,12 +1,12 @@
 import { Router } from 'express';
-import { registroDiarioController } from '../controllers/registroDiarioController.js';
+import { registroController } from '../controllers/registroController.js';
 
 const router = Router();
 
-router.get('/', registroDiarioController.listar);
-router.get('/:id', registroDiarioController.buscarPorId);
-router.post('/', registroDiarioController.criar);
-router.put('/:id', registroDiarioController.atualizar);
-router.delete('/:id', registroDiarioController.remover);
+router.get('/', registroController.listar);
+router.get('/:id', registroController.buscarPorId);
+router.post('/', registroController.criar);
+router.put('/:id', registroController.atualizar);
+router.delete('/:id', registroController.remover);
 
 export default router;

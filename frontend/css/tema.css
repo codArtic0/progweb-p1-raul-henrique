@@ -1,133 +1,240 @@
-/* Tema fitness do Projeto 1.
-   Vem DEPOIS do Bootstrap e do style.css: só sobrescreve variáveis e estilos,
-   sem tocar na estrutura nem no JavaScript. */
+/* TrackerFit · identidade "terminal moderno".
+   Vem DEPOIS do Bootstrap: define os tokens e remapeia as variáveis do Bootstrap.
+   Princípios: superfícies planas, linhas de 1 px no lugar de sombras, cantos pouco
+   arredondados, números em fonte monoespaçada e UMA cor de destaque.
+   Cor de hábito (igual em toda a tela): treino laranja · água azul · sono violeta. */
+
 :root {
-  --fit-accent: #0f766e;       /* verde-azulado: 5,5:1 sobre branco */
-  --fit-accent-dark: #115e59;
-  --fit-accent-rgb: 15, 118, 110;
-  --bs-primary: var(--fit-accent);
-  --bs-primary-rgb: var(--fit-accent-rgb);
-  --bs-link-color: var(--fit-accent);
-  --bs-link-color-rgb: var(--fit-accent-rgb);
-  --bs-link-hover-color: var(--fit-accent-dark);
-  --bs-focus-ring-color: rgba(var(--fit-accent-rgb), 0.35);
-  --bs-body-bg: #f4f7f6;
-  --bs-tertiary-bg: #f4f7f6;
+  --fonte-texto: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --fonte-mono: "JetBrains Mono", ui-monospace, "Cascadia Code", "SF Mono", Consolas, monospace;
+  --raio: 4px;
+  --raio-grande: 6px;
 }
 
-/* Cabeçalho com degradê */
-.topo {
-  background: linear-gradient(135deg, #0b3d3a 0%, var(--fit-accent) 100%);
-}
-.topo h1 {
-  font-weight: 700;
-  letter-spacing: -0.01em;
-}
-.topo p {
-  opacity: 0.9;
+/* ---------- Tema escuro (padrão) ---------- */
+[data-bs-theme="dark"] {
+  --bg: #09090b;
+  --superficie: #101013;
+  --superficie-2: #17171b;
+  --linha: #26262c;
+  --linha-forte: #3a3a42;
+  --tinta: #ededf0;
+  --suave: #8e8e99;
+  --destaque: #c8f031;        /* lima */
+  --destaque-tinta: #09090b;  /* texto sobre o destaque */
+  --botao-bg: #c8f031;
+  --botao-fg: #09090b;
+  --t-treino: #ff7a45;
+  --t-agua: #4cc3ff;
+  --t-sono: #b197fc;
+  --ok: #c8f031;
+  --perigo: #ff6b6b;
 }
 
-/* Botões e campos com a cor do tema */
+/* ---------- Tema claro ---------- */
+[data-bs-theme="light"] {
+  --bg: #f4f4f0;
+  --superficie: #ffffff;
+  --superficie-2: #ecece7;
+  --linha: #dcdcd4;
+  --linha-forte: #b9b9b0;
+  --tinta: #111111;
+  --suave: #62625c;
+  --destaque: #3f6212;
+  --destaque-tinta: #ffffff;
+  --botao-bg: #111111;
+  --botao-fg: #c8f031;
+  --t-treino: #c2410c;
+  --t-agua: #0369a1;
+  --t-sono: #6d28d9;
+  --ok: #3f6212;
+  --perigo: #b91c1c;
+}
+
+:root {
+  --bs-body-font-family: var(--fonte-texto);
+  --bs-body-bg: var(--bg);
+  --bs-body-color: var(--tinta);
+  --bs-secondary-color: var(--suave);
+  --bs-secondary-bg: var(--superficie);
+  --bs-tertiary-bg: var(--superficie-2);
+  --bs-border-color: var(--linha);
+  --bs-border-color-translucent: var(--linha);
+  --bs-border-radius: var(--raio);
+  --bs-border-radius-sm: var(--raio);
+  --bs-border-radius-lg: var(--raio-grande);
+  --bs-link-color: var(--destaque);
+  --bs-link-hover-color: var(--tinta);
+  --bs-primary: var(--destaque);
+  --bs-focus-ring-color: color-mix(in srgb, var(--destaque) 40%, transparent);
+  --bs-danger: var(--perigo);
+  --bs-danger-rgb: 255, 107, 107;
+}
+
+/* Cor por tipo de hábito: --cor (forte) e --suave-tipo (fundo translúcido) */
+.tipo-treino { --cor: var(--t-treino); }
+.tipo-agua { --cor: var(--t-agua); }
+.tipo-sono { --cor: var(--t-sono); }
+.tipo-treino, .tipo-agua, .tipo-sono {
+  --suave-tipo: color-mix(in srgb, var(--cor) 16%, transparent);
+}
+
+body {
+  background: var(--bg);
+  color: var(--tinta);
+  font-size: 0.95rem;
+  -webkit-font-smoothing: antialiased;
+}
+::selection { background: var(--destaque); color: var(--destaque-tinta); }
+
+/* ---------- Botões ---------- */
+.btn {
+  --bs-btn-border-radius: var(--raio);
+  --bs-btn-font-weight: 600;
+  font-size: 0.875rem;
+  letter-spacing: 0.01em;
+}
 .btn-primary {
-  --bs-btn-bg: var(--fit-accent);
-  --bs-btn-border-color: var(--fit-accent);
-  --bs-btn-hover-bg: var(--fit-accent-dark);
-  --bs-btn-hover-border-color: var(--fit-accent-dark);
-  --bs-btn-active-bg: var(--fit-accent-dark);
-  --bs-btn-active-border-color: var(--fit-accent-dark);
-  --bs-btn-disabled-bg: var(--fit-accent);
-  --bs-btn-disabled-border-color: var(--fit-accent);
-  --bs-btn-focus-shadow-rgb: var(--fit-accent-rgb);
+  --bs-btn-color: var(--botao-fg);
+  --bs-btn-bg: var(--botao-bg);
+  --bs-btn-border-color: var(--botao-bg);
+  --bs-btn-hover-color: var(--botao-fg);
+  --bs-btn-hover-bg: var(--botao-bg);
+  --bs-btn-hover-border-color: var(--destaque);
+  --bs-btn-active-color: var(--botao-fg);
+  --bs-btn-active-bg: var(--botao-bg);
+  --bs-btn-active-border-color: var(--destaque);
+  --bs-btn-disabled-color: var(--botao-fg);
+  --bs-btn-disabled-bg: var(--botao-bg);
+  --bs-btn-disabled-border-color: var(--botao-bg);
+  --bs-btn-focus-shadow-rgb: 200, 240, 49;
 }
-.btn-outline-primary {
-  --bs-btn-color: var(--fit-accent);
-  --bs-btn-border-color: var(--fit-accent);
-  --bs-btn-hover-bg: var(--fit-accent);
-  --bs-btn-hover-border-color: var(--fit-accent);
-  --bs-btn-active-bg: var(--fit-accent-dark);
-  --bs-btn-active-border-color: var(--fit-accent-dark);
-  --bs-btn-disabled-color: var(--fit-accent);
-  --bs-btn-disabled-border-color: var(--fit-accent);
-  --bs-btn-focus-shadow-rgb: var(--fit-accent-rgb);
+.btn-primary:hover { filter: brightness(1.08); }
+.btn-outline-primary,
+.btn-outline-secondary {
+  --bs-btn-color: var(--tinta);
+  --bs-btn-border-color: var(--linha-forte);
+  --bs-btn-hover-color: var(--tinta);
+  --bs-btn-hover-bg: var(--superficie-2);
+  --bs-btn-hover-border-color: var(--tinta);
+  --bs-btn-active-color: var(--tinta);
+  --bs-btn-active-bg: var(--superficie-2);
+  --bs-btn-active-border-color: var(--tinta);
+  --bs-btn-disabled-color: var(--suave);
+  --bs-btn-disabled-border-color: var(--linha);
 }
+.btn-outline-danger {
+  --bs-btn-color: var(--perigo);
+  --bs-btn-border-color: var(--linha-forte);
+  --bs-btn-hover-color: var(--perigo);
+  --bs-btn-hover-bg: color-mix(in srgb, var(--perigo) 12%, transparent);
+  --bs-btn-hover-border-color: var(--perigo);
+  --bs-btn-active-color: var(--perigo);
+  --bs-btn-active-bg: color-mix(in srgb, var(--perigo) 18%, transparent);
+  --bs-btn-active-border-color: var(--perigo);
+}
+.spinner-border.text-primary { color: var(--destaque) !important; }
+
+/* ---------- Campos ---------- */
+.form-label {
+  margin-bottom: 0.35rem;
+  font-family: var(--fonte-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--suave);
+}
+.form-control,
+.form-select,
+.input-group-text {
+  background-color: var(--bg);
+  border-color: var(--linha-forte);
+  color: var(--tinta);
+  border-radius: var(--raio);
+}
+.input-group-text {
+  font-family: var(--fonte-mono);
+  font-size: 0.8rem;
+  color: var(--suave);
+  background-color: var(--superficie-2);
+}
+.form-control::placeholder { color: var(--suave); opacity: 0.7; }
 .form-control:focus,
 .form-select:focus {
-  border-color: var(--fit-accent);
-  box-shadow: 0 0 0 0.25rem rgba(var(--fit-accent-rgb), 0.25);
+  background-color: var(--bg);
+  color: var(--tinta);
+  border-color: var(--destaque);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--destaque) 28%, transparent);
 }
-.form-check-input:checked {
-  background-color: var(--fit-accent);
-  border-color: var(--fit-accent);
-}
-.form-check-input:focus {
-  border-color: var(--fit-accent);
-  box-shadow: 0 0 0 0.25rem rgba(var(--fit-accent-rgb), 0.25);
-}
-.spinner-border.text-primary {
-  color: var(--fit-accent) !important;
-}
+.form-control:disabled,
+.form-select:disabled { background-color: var(--superficie-2); opacity: 0.65; }
+.form-text { color: var(--suave); font-size: 0.78rem; }
+[data-bs-theme="light"] .form-select { --bs-form-select-bg-img: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23111' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e"); }
+.form-check-input { background-color: var(--bg); border-color: var(--linha-forte); }
+.form-check-input:checked { background-color: var(--destaque); border-color: var(--destaque); }
 
-/* Cartões: faixa de cor no topo, cabeçalho limpo */
+/* ---------- Painéis (antigos cards) ---------- */
 .card {
-  border: 0;
-  border-top: 3px solid var(--fit-accent);
-  border-radius: 0.75rem;
+  --bs-card-bg: var(--superficie);
+  --bs-card-border-color: var(--linha);
+  --bs-card-border-radius: var(--raio-grande);
+  --bs-card-cap-bg: transparent;
+  border: 1px solid var(--linha);
+  box-shadow: none;
   overflow: hidden;
 }
 .card-header {
-  background-color: #fff;
-  font-weight: 600;
+  padding: 0.7rem 1rem;
+  background: var(--superficie-2);
+  border-bottom: 1px solid var(--linha);
 }
-
-/* Tabelas: cabeçalho discreto, linhas com respiro */
-thead th {
-  font-size: 0.75rem;
-  letter-spacing: 0.04em;
+.card-header h3 {
+  margin: 0;
+  font-family: var(--fonte-mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--bs-secondary-color);
-  border-bottom-width: 2px;
-}
-.table > :not(caption) > * > * {
-  padding-top: 0.75rem;
-  padding-bottom: 0.75rem;
-}
-.table-hover > tbody > tr:hover > * {
-  --bs-table-hover-bg: rgba(var(--fit-accent-rgb), 0.06);
+  color: var(--suave);
 }
 
-/* Link "pular para o conteúdo": visível só com foco do teclado */
+/* ---------- Tabelas ---------- */
+.table {
+  --bs-table-bg: transparent;
+  --bs-table-color: var(--tinta);
+  --bs-table-border-color: var(--linha);
+  --bs-table-hover-bg: var(--superficie-2);
+  --bs-table-hover-color: var(--tinta);
+}
+thead th {
+  font-family: var(--fonte-mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--suave);
+  border-bottom: 1px solid var(--linha-forte);
+  white-space: nowrap;
+}
+.table > :not(caption) > * > * { padding: 0.75rem 0.75rem; }
+tbody tr:last-child > * { border-bottom: 0; }
+
+.alert { border-radius: var(--raio-grande); }
+
+/* ---------- Foco e acessibilidade ---------- */
+a:focus-visible, button:focus-visible, select:focus-visible {
+  outline: 2px solid var(--destaque);
+  outline-offset: 2px;
+}
 .pular-conteudo:focus {
   position: fixed;
   top: 0.5rem;
   left: 0.5rem;
   z-index: 1080;
   padding: 0.5rem 1rem;
-  background: #fff;
-  color: var(--fit-accent-dark);
-  border-radius: 0.5rem;
-  box-shadow: 0 0 0 3px var(--fit-accent);
+  background: var(--destaque);
+  color: var(--destaque-tinta);
+  border-radius: var(--raio);
 }
-main:focus {
-  outline: none;
-}
-
-/* Telas de toque: alvos de pelo menos 44 px (WCAG 2.5.5) */
-@media (pointer: coarse) {
-  .btn,
-  .btn-sm {
-    min-height: 44px;
-    min-width: 44px;
-  }
-  .form-check-input {
-    width: 1.5rem;
-    height: 1.5rem;
-  }
-}
-
-/* Em telas largas e altas, o formulário acompanha a rolagem */
-@media (min-width: 992px) and (min-height: 760px) {
-  .col-lg-4 > .card {
-    position: sticky;
-    top: 1rem;
-  }
-}
+main:focus { outline: none; }

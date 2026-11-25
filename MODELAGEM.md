@@ -3,6 +3,8 @@
 **Aluno(a):** Raul Henrique Alves de Sousa  
 **Domínio:** Tracker de atividades fitness
 
+> **Nota (implementação do Projeto 1):** para o escopo do P1, o app foi simplificado para um **tracker pessoal**, sem contas de usuário. As duas entidades implementadas são `Habito` (nome, tipo, meta diária) e `Registro` (habitoId, data, valor), em relação 1:N: um hábito tem vários registros, no máximo um por data. A modelagem completa abaixo continua sendo a visão de longo prazo.
+
 ## 1. O domínio
 
 O app permite que uma pessoa acompanhe seus hábitos de saúde e atividade física. A pessoa mantém um perfil com dados corporais e objetivo, registra diariamente idas à academia, consumo de água e sono, e adiciona alimentos consumidos usando os valores nutricionais da tabela TACO.

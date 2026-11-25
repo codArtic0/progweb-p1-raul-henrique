@@ -1,82 +1,89 @@
 // Ponto de entrada: liga store, service e view. Nenhuma regra mora aqui.
 import { criarStore } from './state/store.js';
-import { usuarioService } from './services/usuarioService.js';
-import { registroService } from './services/registroService.js';
-import { usuarioView } from './ui/usuarioView.js';
+import { habitoService } from './services/habitoService.js';
+import { registroService, enriquecer } from './services/registroService.js';
+import { calcularResumo, hojePorHabito, ultimosDias } from './services/resumoService.js';
+import { habitoView } from './ui/habitoView.js';
 import { registroView } from './ui/registroView.js';
+import { resumoView } from './ui/resumoView.js';
+import { hojeView } from './ui/hojeView.js';
+import { hidratarIcones } from './ui/icones.js';
+import './ui/tema.js'; // liga o botão de tema claro/escuro
 import { aviso } from './ui/aviso.js';
 
-// ===================== USUÁRIOS =====================
-const usuarios = criarStore({
+hidratarIcones(); // troca os data-icone do HTML pelos SVGs
+
+// ===================== HÁBITOS =====================
+const habitos = criarStore({
   status: 'carregando', // 'carregando' | 'erro' | 'vazio' | 'sucesso'
-  usuarios: [],
+  habitos: [],
   erro: null,
   editandoId: null,
   salvando: false,
 });
 
 // Toda vez que o estado mudar, a view redesenha.
-usuarios.assinar(usuarioView.render);
+habitos.assinar(habitoView.render);
 
-async function carregarUsuarios() {
-  usuarios.set({ status: 'carregando', erro: null });
+async function carregarHabitos() {
+  habitos.set({ status: 'carregando', erro: null });
   try {
-    const lista = await usuarioService.listar();
-    usuarios.set({ status: lista.length ? 'sucesso' : 'vazio', usuarios: lista });
+    const lista = await habitoService.listar();
+    habitos.set({ status: lista.length ? 'sucesso' : 'vazio', habitos: lista });
   } catch (e) {
-    usuarios.set({ status: 'erro', erro: e.message });
+    habitos.set({ status: 'erro', erro: e.message });
   }
 }
 
-async function salvarUsuario(dados) {
-  const { editandoId } = usuarios.get();
+async function salvarHabito(dados) {
+  const { editandoId } = habitos.get();
   aviso.limpar();
-  usuarios.set({ salvando: true });
+  habitos.set({ salvando: true });
   try {
-    if (editandoId) await usuarioService.atualizar(editandoId, dados);
-    else await usuarioService.criar(dados);
+    if (editandoId) await habitoService.atualizar(editandoId, dados);
+    else await habitoService.criar(dados);
 
-    aviso.sucesso(editandoId ? 'Usuário atualizado.' : 'Usuário cadastrado.');
-    usuarioView.limparForm();
-    usuarios.set({ editandoId: null });
-    await carregarUsuarios();
+    aviso.sucesso(editandoId ? 'Hábito atualizado.' : 'Hábito cadastrado.');
+    habitoView.limparForm();
+    habitos.set({ editandoId: null });
+    await carregarHabitos();
   } catch (e) {
     aviso.erro(e.message); // o formulário fica como está, para corrigir
   } finally {
-    usuarios.set({ salvando: false });
+    habitos.set({ salvando: false });
   }
 }
 
-function editarUsuario(id) {
-  const usuario = usuarios.get().usuarios.find((u) => u.id === id);
-  usuarioView.preencherForm(usuario);
-  usuarios.set({ editandoId: id });
+function editarHabito(id) {
+  const habito = habitos.get().habitos.find((h) => h.id === id);
+  habitoView.preencherForm(habito);
+  habitos.set({ editandoId: id });
 }
 
-function cancelarEdicaoUsuario() {
-  usuarioView.limparForm();
-  usuarios.set({ editandoId: null });
+function cancelarEdicaoHabito() {
+  habitoView.limparForm();
+  habitos.set({ editandoId: null });
 }
 
-async function removerUsuario(id) {
-  if (!confirm(`Remover o usuário #${id}?`)) return;
+async function removerHabito(id) {
+  if (!confirm(`Remover o hábito #${id}?`)) return;
   aviso.limpar();
   try {
-    await usuarioService.remover(id);
-    aviso.sucesso('Usuário removido.');
-    if (usuarios.get().editandoId === id) cancelarEdicaoUsuario();
-    await carregarUsuarios();
+    await habitoService.remover(id);
+    aviso.sucesso('Hábito removido.');
+    if (habitos.get().editandoId === id) cancelarEdicaoHabito();
+    await carregarHabitos();
   } catch (e) {
-    aviso.erro(e.message);
+    aviso.erro(e.message); // ex.: 409 hábito com registros
   }
 }
 
-usuarioView.aoEnviar(salvarUsuario);
-usuarioView.aoCancelar(cancelarEdicaoUsuario);
-usuarioView.aoRecarregar(carregarUsuarios);
-usuarioView.aoClicarNaLista({ editar: editarUsuario, remover: removerUsuario });
+habitoView.aoEnviar(salvarHabito);
+habitoView.aoCancelar(cancelarEdicaoHabito);
+habitoView.aoRecarregar(carregarHabitos);
+habitoView.aoClicarNaLista({ editar: editarHabito, remover: removerHabito });
 
-// ===================== REGISTROS DIÁRIOS =====================
+// ===================== REGISTROS =====================
 const registros = criarStore({
   status: 'carregando',
   registros: [],
@@ -85,14 +92,16 @@ const registros = criarStore({
   salvando: false,
 });
 
-registros.assinar(registroView.render);
-
-// Os registros dependem dos usuários: mudou a lista de usuários,
-// refaz o <select> e redesenha os nomes na tabela de registros.
-usuarios.assinar((estado) => {
-  registroView.preencherUsuarios(estado.usuarios);
-  registroView.render(registros.get());
-});
+// Os registros dependem dos hábitos: mudou um dos dois, refaz o <select>
+// e redesenha a tabela com o nome, a meta e o progresso de cada registro.
+function desenharRegistros() {
+  const h = habitos.get();
+  const r = registros.get();
+  registroView.preencherHabitos(h.habitos);
+  registroView.render({ ...r, registros: enriquecer(r.registros, h.habitos) });
+}
+habitos.assinar(desenharRegistros);
+registros.assinar(desenharRegistros);
 
 async function carregarRegistros() {
   registros.set({ status: 'carregando', erro: null });
@@ -117,7 +126,7 @@ async function salvarRegistro(dados) {
     registros.set({ editandoId: null });
     await carregarRegistros();
   } catch (e) {
-    aviso.erro(e.message); // ex.: 400 valor inválido, 409 data repetida, 422 usuário inexistente
+    aviso.erro(e.message); // ex.: 400 valor inválido, 409 dia repetido, 422 hábito inexistente
   } finally {
     registros.set({ salvando: false });
   }
@@ -152,6 +161,39 @@ registroView.aoCancelar(cancelarEdicaoRegistro);
 registroView.aoRecarregar(carregarRegistros);
 registroView.aoClicarNaLista({ editar: editarRegistro, remover: removerRegistro });
 
+// ===================== RESUMO =====================
+// Deriva dos dois stores: só mostra números quando as duas listas chegaram.
+function atualizarResumo() {
+  const h = habitos.get();
+  const r = registros.get();
+  const pronto = ['sucesso', 'vazio'].includes(h.status) && ['sucesso', 'vazio'].includes(r.status);
+  if (!pronto) {
+    resumoView.render(null);
+    hojeView.render(null);
+    return;
+  }
+  const lista = enriquecer(r.registros, h.habitos);
+  resumoView.render(calcularResumo(h.habitos, lista));
+  hojeView.render({
+    cartoes: hojePorHabito(h.habitos, lista),
+    dias: ultimosDias(h.habitos, lista),
+  });
+}
+habitos.assinar(atualizarResumo);
+registros.assinar(atualizarResumo);
+
+// Painel "Hoje": registrar um hábito novo (preenche o formulário) ou ajustar o de hoje
+hojeView.aoClicar({
+  registrar: (habitoId) => {
+    registros.set({ editandoId: null });
+    registroView.prepararNovo(habitoId);
+  },
+  ajustar: (registroId) => {
+    editarRegistro(registroId);
+    document.querySelector('#form-registro').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  },
+});
+
 // ===================== INÍCIO =====================
-carregarUsuarios();
+carregarHabitos();
 carregarRegistros();

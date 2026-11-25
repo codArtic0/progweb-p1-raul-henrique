@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import usuariosRouter from './routes/usuarios.js';
+import habitosRouter from './routes/habitos.js';
 import registrosRouter from './routes/registros.js';
 import { logger } from './middleware/logger.js';
 import { errorHandler } from './middleware/errorHandler.js';
@@ -8,19 +8,20 @@ import { errorHandler } from './middleware/errorHandler.js';
 const app = express();
 
 // --- Middleware global (antes das rotas) ---
-app.use(cors({
-  origin: ['http://localhost:5500', 'http://127.0.0.1:5500'],
-}));
+// Em produção, a origem do front vem da variável CORS_ORIGIN.
+const origens = (process.env.CORS_ORIGIN
+  ?? 'http://localhost:5500,http://127.0.0.1:5500').split(',');
+app.use(cors({ origin: origens }));
 app.use(express.json()); // lê o body JSON para req.body
 app.use(logger);         // loga toda requisição
 
 // --- Health check ---
 app.get('/', (req, res) => {
-  res.json({ api: 'Tracker Fitness API', versao: '1.0.0', rotas: ['/usuarios', '/registros'] });
+  res.json({ api: 'TrackerFit API', versao: '1.0.0', rotas: ['/habitos', '/registros'] });
 });
 
 // --- Rotas ---
-app.use('/usuarios', usuariosRouter);
+app.use('/habitos', habitosRouter);
 app.use('/registros', registrosRouter);
 
 // --- 404 para rotas que não existem ---

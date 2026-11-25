@@ -1,29 +1,33 @@
-# Testes da API — Projeto 1 (S3)
+# Testes da API — Projeto 1 (S3, atualizado na S5)
 
-API: Tracker Fitness · entidades: Usuario e RegistroDiario (1:N) · servidor: `npm run dev` em http://localhost:3000
+API: TrackerFit · entidades: Habito e Registro (1:N) · servidor: `npm run dev` em http://localhost:3000
 
 Regras de negócio (no service):
 
-- **Usuario:** `nome` e `email` obrigatórios (400); email com formato válido (400); email único (409).
-- **RegistroDiario:** `usuarioId` e `data` obrigatórios (400); `data` em AAAA-MM-DD, `aguaConsumidaMl` ≥ 0, `duracaoSonoMinutos` entre 0 e 1440 (400); o usuário precisa existir (422); no máximo um registro por usuário por data (409).
+- **Habito:** `nome`, `tipo` e `meta` obrigatórios (400); `tipo` ∈ treino/agua/sono (400); `meta` > 0 (400); `nome` único (409, inclusive ao editar); hábito com registros não é removido (409).
+- **Registro:** `habitoId`, `data` e `valor` obrigatórios (400); `data` em AAAA-MM-DD e `valor` ≥ 0 (400); treino/sono até 1440 min (400); o hábito precisa existir (422); no máximo um registro por hábito por data (409).
 
-Sequência executada com o servidor recém-iniciado (memória vazia):
+Sequência executada com o banco recém-criado (3 hábitos e 16 registros de exemplo):
 
 | # | Método | URL | Body | Status obtido | Observação |
 |---|---|---|---|---|---|
-| 1 | GET | / | — | 200 | health check com o nome da API e as rotas |
-| 2 | POST | /usuarios | {"nome":"Raul Henrique","email":"raul@email.com"} | 201 | |
-| 3 | POST | /registros | {"usuarioId":1,"data":"2026-11-13","foiAcademia":true,"aguaConsumidaMl":2000,"duracaoSonoMinutos":450} | 201 | |
-| 4 | GET | /registros?usuarioId=1 | — | 200 | filtro 1:N |
-| 5 | GET | /registros/1 | — | 200 | |
-| 6 | GET | /registros/99 | — | 404 | registro inexistente |
-| 7 | POST | /usuarios | {"nome":"Outro","email":"raul@email.com"} | 409 | regra: email único |
-| 8 | POST | /usuarios | {"nome":"Sem Email"} | 400 | campo obrigatório ausente |
-| 9 | POST | /registros | {"usuarioId":1,"data":"2026-11-13"} | 409 | regra: um registro por usuário por data |
-| 10 | POST | /registros | {"usuarioId":999,"data":"2026-11-14"} | 422 | usuário não existe |
-| 11 | POST | /registros | {"usuarioId":1,"data":"2026-11-14","aguaConsumidaMl":-5} | 400 | regra: água ≥ 0 |
-| 12 | PUT | /registros/1 | {"aguaConsumidaMl":2500} | 200 | |
-| 13 | PUT | /usuarios/1 | {"nome":"Raul H. Sousa"} | 200 | |
-| 14 | DELETE | /registros/1 | — | 204 | |
-| 15 | GET | /registros/1 | — | 404 | confirma a remoção |
-| 16 | DELETE | /usuarios/1 | — | 204 | |
+| 1 | GET | /habitos | — | 200 | 3 hábitos de exemplo |
+| 2 | GET | /registros | — | 200 | 16 registros de exemplo |
+| 3 | POST | /habitos | {"nome":"Corrida","tipo":"treino","meta":30} | 201 | |
+| 4 | POST | /habitos | {"nome":"Corrida","tipo":"treino","meta":30} | 409 | regra: nome único |
+| 5 | POST | /habitos | {"nome":"X","tipo":"yoga","meta":30} | 400 | tipo inválido |
+| 6 | POST | /habitos | {"nome":"X","tipo":"agua","meta":0} | 400 | meta > 0 |
+| 7 | POST | /habitos | {"nome":"X"} | 400 | campo obrigatório ausente |
+| 8 | PUT | /habitos/4 | {"meta":40} | 200 | |
+| 9 | PUT | /habitos/4 | {"nome":"Academia"} | 409 | nome de outro hábito |
+| 10 | POST | /registros | {"habitoId":4,"data":"2026-11-20","valor":35} | 201 | |
+| 11 | POST | /registros | {"habitoId":4,"data":"2026-11-20","valor":35} | 409 | regra: um registro por hábito por data |
+| 12 | POST | /registros | {"habitoId":999,"data":"2026-11-20","valor":1} | 422 | hábito não existe |
+| 13 | POST | /registros | {"habitoId":4,"data":"2026-11-21","valor":-1} | 400 | valor ≥ 0 |
+| 14 | POST | /registros | {"habitoId":4,"data":"2026-11-21","valor":2000} | 400 | treino acima de 1440 min |
+| 15 | GET | /registros?habitoId=4 | — | 200 | filtro 1:N |
+| 16 | PUT | /registros/17 | {"valor":50} | 200 | |
+| 17 | DELETE | /habitos/4 | — | 409 | hábito com registros |
+| 18 | DELETE | /registros/17 | — | 204 | |
+| 19 | DELETE | /habitos/4 | — | 204 | |
+| 20 | GET | /habitos/4 | — | 404 | confirma a remoção |
