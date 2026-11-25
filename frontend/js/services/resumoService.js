@@ -1,8 +1,6 @@
 // Regras do resumo: números derivados dos hábitos e dos registros já enriquecidos.
 // Função pura (recebe "hoje" por parâmetro), fácil de testar.
-function chaveDoDia(d) {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
+import { chaveDoDia } from '../utils/datas.js';
 
 // Sequência: dias seguidos, até hoje, com pelo menos uma meta batida.
 // Se hoje ainda não tem meta batida, a conta começa por ontem (o dia ainda não acabou).

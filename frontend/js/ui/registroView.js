@@ -1,6 +1,8 @@
 // Camada de UI dos registros. Mesmo molde da habitoView, com um <select> a mais.
 import { icone } from './icones.js';
 import { TIPOS, formatarValor } from './tipos.js';
+import { celula, celulaDeAcoes, mostrarEstado, rotuloDoSalvar, aoClicarNaLista } from './dom.js';
+import { formatarData, hoje } from '../utils/datas.js';
 
 const el = {
   form: document.querySelector('#form-registro'),
@@ -20,37 +22,6 @@ const el = {
 
 // id → hábito, para mostrar unidade e meta no formulário
 let habitosPorId = new Map();
-
-// '2026-11-17' → '17/11/2026' (sem Date: evita o deslocamento de fuso horário)
-function formatarData(data) {
-  const [ano, mes, dia] = data.split('-');
-  return `${dia}/${mes}/${ano}`;
-}
-
-// Data de hoje no fuso local, no formato do <input type="date">
-function hoje() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
-
-function celula(classe = '', rotulo = '') {
-  const td = document.createElement('td');
-  td.className = classe;
-  if (rotulo) td.dataset.rotulo = rotulo; // usado pelo layout de cartões no celular
-  return td;
-}
-
-function botao(rotulo, nomeIcone, acao, id, classe) {
-  const b = document.createElement('button');
-  b.type = 'button';
-  b.className = `btn btn-sm btn-icone ${classe}`;
-  b.dataset.acao = acao;
-  b.dataset.id = id;
-  b.setAttribute('aria-label', rotulo);
-  b.title = rotulo;
-  b.append(icone(nomeIcone));
-  return b;
-}
 
 function linha(registro, editandoId) {
   const { habito } = registro;
@@ -107,13 +78,8 @@ function linha(registro, editandoId) {
     progresso.textContent = String(registro.valor);
   }
 
-  const acoes = celula('text-end text-nowrap celula-acoes');
-  acoes.append(
-    botao(`Editar registro de ${formatarData(registro.data)}`, 'lapis', 'editar', registro.id, 'btn-outline-primary me-1'),
-    botao(`Remover registro de ${formatarData(registro.data)}`, 'lixeira', 'remover', registro.id, 'btn-outline-danger'),
-  );
-
-  tr.append(quando, qual, progresso, acoes);
+  const nomeDoDia = `registro de ${formatarData(registro.data)}`;
+  tr.append(quando, qual, progresso, celulaDeAcoes(registro.id, nomeDoDia));
   return tr;
 }
 
@@ -144,10 +110,7 @@ export const registroView = {
   },
 
   render({ status, registros, erro, editandoId, salvando }) {
-    el.carregando.classList.toggle('d-none', status !== 'carregando');
-    el.erro.classList.toggle('d-none', status !== 'erro');
-    el.vazio.classList.toggle('d-none', status !== 'vazio');
-    el.sucesso.classList.toggle('d-none', status !== 'sucesso');
+    mostrarEstado({ carregando: el.carregando, erro: el.erro, vazio: el.vazio, sucesso: el.sucesso }, status);
 
     el.erroMsg.textContent = erro ?? '';
     el.linhas.replaceChildren(...registros.map((r) => linha(r, editandoId)));
@@ -157,9 +120,7 @@ export const registroView = {
     el.form.data.disabled = Boolean(editandoId);
 
     el.salvar.disabled = salvando;
-    el.salvar.textContent = salvando
-      ? 'Salvando…'
-      : editandoId ? 'Salvar alterações' : 'Registrar';
+    el.salvar.textContent = rotuloDoSalvar({ salvando, editandoId }, 'Registrar');
     el.cancelar.classList.toggle('d-none', !editandoId);
   },
 
@@ -193,14 +154,8 @@ export const registroView = {
     el.recarregar.addEventListener('click', fn);
   },
 
-  aoClicarNaLista({ editar, remover }) {
-    el.linhas.addEventListener('click', (evento) => {
-      const alvo = evento.target.closest('button[data-acao]');
-      if (!alvo) return;
-      const id = Number(alvo.dataset.id);
-      if (alvo.dataset.acao === 'editar') editar(id);
-      if (alvo.dataset.acao === 'remover') remover(id);
-    });
+  aoClicarNaLista(acoes) {
+    aoClicarNaLista(el.linhas, acoes);
   },
 };
 

@@ -2,6 +2,7 @@
 // Não faz fetch e não valida regra: desenha o estado e avisa dos eventos.
 import { icone } from './icones.js';
 import { TIPOS } from './tipos.js';
+import { celula, celulaDeAcoes, mostrarEstado, rotuloDoSalvar, aoClicarNaLista } from './dom.js';
 
 const el = {
   form: document.querySelector('#form-habito'),
@@ -16,25 +17,6 @@ const el = {
   sucesso: document.querySelector('#habitos-sucesso'),
   linhas: document.querySelector('#habitos-linhas'),
 };
-
-function celula(classe = '', rotulo = '') {
-  const td = document.createElement('td');
-  td.className = classe;
-  if (rotulo) td.dataset.rotulo = rotulo; // usado pelo layout de cartões no celular
-  return td;
-}
-
-function botao(rotulo, nomeIcone, acao, id, classe) {
-  const b = document.createElement('button');
-  b.type = 'button';
-  b.className = `btn btn-sm btn-icone ${classe}`;
-  b.dataset.acao = acao;
-  b.dataset.id = id;
-  b.setAttribute('aria-label', rotulo);
-  b.title = rotulo;
-  b.append(icone(nomeIcone));
-  return b;
-}
 
 function linha(habito, editandoId) {
   const tipo = TIPOS[habito.tipo];
@@ -63,23 +45,14 @@ function linha(habito, editandoId) {
   const meta = celula('numero', 'Meta por dia');
   meta.textContent = `${habito.meta} ${tipo.unidade}`;
 
-  const acoes = celula('text-end text-nowrap celula-acoes');
-  acoes.append(
-    botao(`Editar ${habito.nome}`, 'lapis', 'editar', habito.id, 'btn-outline-primary me-1'),
-    botao(`Remover ${habito.nome}`, 'lixeira', 'remover', habito.id, 'btn-outline-danger'),
-  );
-
-  tr.append(quem, meta, acoes);
+  tr.append(quem, meta, celulaDeAcoes(habito.id, habito.nome));
   return tr;
 }
 
 export const habitoView = {
   // Desenha a tela a partir do estado: a UI é função do estado.
   render({ status, habitos, erro, editandoId, salvando }) {
-    el.carregando.classList.toggle('d-none', status !== 'carregando');
-    el.erro.classList.toggle('d-none', status !== 'erro');
-    el.vazio.classList.toggle('d-none', status !== 'vazio');
-    el.sucesso.classList.toggle('d-none', status !== 'sucesso');
+    mostrarEstado({ carregando: el.carregando, erro: el.erro, vazio: el.vazio, sucesso: el.sucesso }, status);
 
     el.erroMsg.textContent = erro ?? '';
     el.linhas.replaceChildren(...habitos.map((h) => linha(h, editandoId)));
@@ -88,9 +61,7 @@ export const habitoView = {
     el.form.tipo.disabled = Boolean(editandoId);
 
     el.salvar.disabled = salvando;
-    el.salvar.textContent = salvando
-      ? 'Salvando…'
-      : editandoId ? 'Salvar alterações' : 'Cadastrar hábito';
+    el.salvar.textContent = rotuloDoSalvar({ salvando, editandoId }, 'Cadastrar hábito');
     el.cancelar.classList.toggle('d-none', !editandoId);
   },
 
@@ -124,15 +95,8 @@ export const habitoView = {
     el.recarregar.addEventListener('click', fn);
   },
 
-  // Delegação: UM listener no <tbody> atende os botões de todas as linhas.
-  aoClicarNaLista({ editar, remover }) {
-    el.linhas.addEventListener('click', (evento) => {
-      const alvo = evento.target.closest('button[data-acao]');
-      if (!alvo) return;
-      const id = Number(alvo.dataset.id); // tudo que vem do DOM é string
-      if (alvo.dataset.acao === 'editar') editar(id);
-      if (alvo.dataset.acao === 'remover') remover(id);
-    });
+  aoClicarNaLista(acoes) {
+    aoClicarNaLista(el.linhas, acoes);
   },
 };
 
